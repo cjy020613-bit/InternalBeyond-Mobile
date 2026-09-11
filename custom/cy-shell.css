@@ -1,0 +1,20 @@
+/*
+ * CY customization layer.
+ * Keep local visual overrides here so upstream's single-file app stays mergeable.
+ */
+
+:root {
+  --cy-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html[data-cy-shell="ready"] body {
+  min-height: 100dvh;
+}
+
+html[data-cy-shell="ready"] .cy-only {
+  display: initial;
+}
+
+.cy-only {
+  display: none;
+}

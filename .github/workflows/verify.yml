@@ -1,0 +1,29 @@
+name: Verify IB CY
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          node --check custom/cy-shell.js
+          node --check custom/cy-ob-bridge.js
+          node --check apps/catalog.js
+          node --check apps/ib-app-cinema.js
+          node --check ib-sw.js
+      - name: Check runtime files
+        run: |
+          node scripts/check.mjs
+          node scripts/check-inline.mjs
+          node scripts/check-ob-bridge.mjs
