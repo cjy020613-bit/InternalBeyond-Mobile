@@ -306,9 +306,7 @@ body.theme-infernal #cy-paw {
 }
 
 body.cy-conversation-open #cy-paw {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(12px) scale(.9);
+  bottom: calc(82px + var(--cy-safe-bottom));
 }
 
 #cy-paw-panel {
@@ -316,7 +314,9 @@ body.cy-conversation-open #cy-paw {
   right: calc(16px + env(safe-area-inset-right, 0px));
   bottom: calc(145px + var(--cy-safe-bottom));
   z-index: 48;
-  width: min(315px, calc(100vw - 32px));
+  width: min(345px, calc(100vw - 32px));
+  max-height: min(610px, calc(100dvh - 190px));
+  overflow-y: auto;
   padding: 17px;
   border: 1px solid rgba(255,255,255,.76);
   border-radius: 27px;
@@ -374,23 +374,145 @@ body.cy-conversation-open #cy-paw {
   line-height: 1.55;
 }
 
-.cy-paw-action {
-  width: 100%;
-  height: 46px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid rgba(112,145,188,.18);
-  border-radius: 16px;
-  color: #385678;
-  background: rgba(255,255,255,.58);
-  font: 550 .84rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
+.cy-paw-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
 }
 
-.cy-paw-action b {
-  font-size: 1.4rem;
-  font-weight: 300;
+.cy-paw-chip {
+  min-width: 0;
+  height: 43px;
+  padding: 0 10px;
+  border: 1px solid rgba(112,145,188,.18);
+  border-radius: 15px;
+  color: #385678;
+  background: rgba(255,255,255,.58);
+  font: 560 .82rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: transform .14s ease, background .14s ease;
+}
+
+.cy-paw-chip:active {
+  transform: scale(.96);
+  background: rgba(197,218,245,.62);
+}
+
+.cy-paw-feedback {
+  min-height: 22px;
+  padding-top: 8px;
+  color: #6b86aa;
+  font-size: .68rem;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.cy-paw-feedback.show {
+  opacity: 1;
+}
+
+.cy-paw-tools,
+.cy-paw-editor-actions,
+.cy-paw-editor-save {
+  display: flex;
+  gap: 8px;
+}
+
+.cy-paw-tools button,
+.cy-paw-editor-actions button,
+.cy-paw-editor-save button {
+  flex: 1;
+  height: 38px;
+  border: 1px solid rgba(112,145,188,.18);
+  border-radius: 13px;
+  color: #536b8a;
+  background: rgba(255,255,255,.46);
+  font-size: .72rem;
+}
+
+.cy-paw-editor {
+  padding: 12px;
+  border: 1px solid rgba(112,145,188,.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,.42);
+}
+
+.cy-paw-editor[hidden],
+.cy-paw-actions[hidden],
+.cy-paw-tools[hidden] {
+  display: none !important;
+}
+
+.cy-paw-editor-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  color: #415c7e;
+  font-size: .78rem;
+}
+
+.cy-paw-editor-head span {
+  color: #8998ab;
+  font-size: .62rem;
+}
+
+.cy-paw-editor-list {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.cy-paw-edit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 31px 31px 31px;
+  gap: 5px;
+}
+
+.cy-paw-edit-row input {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(112,145,188,.2);
+  border-radius: 11px;
+  outline: none;
+  color: #304b6d;
+  background: rgba(255,255,255,.7);
+  font-size: .74rem;
+}
+
+.cy-paw-edit-row input:focus {
+  border-color: rgba(86,124,175,.58);
+  box-shadow: 0 0 0 3px rgba(106,146,199,.1);
+}
+
+.cy-paw-edit-row button {
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(112,145,188,.16);
+  border-radius: 10px;
+  color: #617895;
+  background: rgba(255,255,255,.52);
+}
+
+.cy-paw-edit-row button:disabled {
+  opacity: .3;
+}
+
+.cy-paw-edit-row button.danger {
+  color: #b26f78;
+}
+
+.cy-paw-editor-save {
+  margin-top: 8px;
+}
+
+#cy-paw-save {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(145deg, #7897c1, #58769e);
 }
 
 .cy-paw-state {
@@ -410,7 +532,15 @@ body.theme-infernal #cy-paw-panel {
 
 body.theme-infernal .cy-paw-head b { color: #edf2fb; }
 body.theme-infernal #cy-paw-panel > p { color: #a9b6ca; }
-body.theme-infernal .cy-paw-action { color: #cfdbed; background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
+body.theme-infernal .cy-paw-chip,
+body.theme-infernal .cy-paw-tools button,
+body.theme-infernal .cy-paw-editor-actions button,
+body.theme-infernal .cy-paw-editor-save button,
+body.theme-infernal .cy-paw-edit-row button { color: #cfdbed; background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
+body.theme-infernal .cy-paw-editor { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.1); }
+body.theme-infernal .cy-paw-editor-head { color: #d7e2f2; }
+body.theme-infernal .cy-paw-edit-row input { color: #e8eef8; background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); }
+body.theme-infernal #cy-paw-save { color: #fff; background: linear-gradient(145deg, #6d8db8, #4e698e); }
 
 @keyframes cyPulse {
   0%, 100% { opacity: .45; transform: scale(.85); }
