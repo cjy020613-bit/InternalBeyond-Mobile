@@ -5,7 +5,7 @@
   var queue = [];
   var started = false;
 
-  api.version = '0.4.0';
+  api.version = '0.5.0';
   api.register = function (name, initializer) {
     if (typeof initializer !== 'function') return;
     var module = { name: String(name || 'anonymous'), initializer: initializer };
@@ -28,6 +28,19 @@
     document.documentElement.setAttribute('data-cy-version', api.version);
     while (queue.length) run(queue.shift());
     window.dispatchEvent(new CustomEvent('ibcy:ready', { detail: { version: api.version } }));
+    if (!document.getElementById('cy-gateway-css')) {
+      var gatewayCss = document.createElement('link');
+      gatewayCss.id = 'cy-gateway-css';
+      gatewayCss.rel = 'stylesheet';
+      gatewayCss.href = './custom/cy-gateway.css?v=0.5.0';
+      document.head.appendChild(gatewayCss);
+    }
+    if (!document.getElementById('cy-gateway-script')) {
+      var gatewayScript = document.createElement('script');
+      gatewayScript.id = 'cy-gateway-script';
+      gatewayScript.src = './custom/cy-gateway.js?v=0.5.0';
+      document.body.appendChild(gatewayScript);
+    }
   }
 
   api.ready = function (callback) {
@@ -464,6 +477,11 @@
       paw.addEventListener('click', function () { setOpen(!panel.classList.contains('open')); });
       document.getElementById('cy-paw-close').addEventListener('click', function () { setEditing(false); setOpen(false); });
       document.getElementById('cy-go-chat').addEventListener('click', function () {
+        if (shell.gateway && typeof shell.gateway.openChat === 'function') {
+          shell.gateway.openChat().catch(function () {});
+          setOpen(false);
+          return;
+        }
         var chat = document.querySelector('.dw-item[data-page="chat"]');
         if (chat) chat.click();
         setOpen(false);
@@ -559,6 +577,12 @@
     installChatHero();
     installPaw();
     window.addEventListener('ibcy:ob-status', function (event) { readObState(event.detail); });
+    window.addEventListener('ibcy:gateway-status', function (event) {
+      var detail = event.detail || {};
+      statusText = detail.text || '订阅未连接';
+      statusTone = detail.status || 'local';
+      paintStatus();
+    });
     readObState();
   });
 }());

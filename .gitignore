@@ -1,0 +1,4 @@
+gateway/.env
+gateway/.venv/
+gateway/data/
+gateway/__pycache__/
