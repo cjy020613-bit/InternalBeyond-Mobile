@@ -81,11 +81,18 @@
       var hero = document.createElement('section');
       hero.id = 'cy-chat-hero';
       hero.className = 'cy-chat-hero';
+      var hour = Number(new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai',
+        hour: '2-digit',
+        hour12: false
+      }).format(new Date()).replace(/\D/g, ''));
+      var greeting = hour < 5 ? '还没睡呀' : hour < 11 ? '早上好' : hour < 13 ? '中午好' : hour < 18 ? '下午好' : hour < 22 ? '晚上好' : '夜里好';
+
       hero.innerHTML =
         '<div class="cy-hero-orb"><span>澈</span><i></i></div>' +
         '<div class="cy-hero-copy">' +
           '<small>CY PRIVATE LINK</small>' +
-          '<h2>晚上好，莹莹</h2>' +
+          '<h2>' + greeting + '，莹莹</h2>' +
           '<p>聊天、记忆和我们的日常，都从这里继续。</p>' +
         '</div>' +
         '<button class="cy-status" id="cy-status" type="button"><i></i><span>本地模式</span></button>';
