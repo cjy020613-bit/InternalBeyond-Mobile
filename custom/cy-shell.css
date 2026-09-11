@@ -282,6 +282,10 @@ html[data-cy-shell="ready"] .m.user {
   transform: scale(.94);
 }
 
+#cy-paw.tapped {
+  animation: cyPawTap .18s ease-out;
+}
+
 #cy-paw svg {
   width: 25px;
   height: 25px;
@@ -412,6 +416,75 @@ body.cy-conversation-open #cy-paw {
 .cy-paw-feedback.show {
   opacity: 1;
 }
+
+#conv #cv-msgs .mrow.cy-paw-event-row {
+  align-self: stretch;
+  justify-content: center;
+  margin: 1px 0;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-body {
+  width: 100%;
+  max-width: 100%;
+  justify-content: center;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-col {
+  max-width: 100%;
+  align-items: center;
+}
+
+#conv #cv-msgs .m.cy-paw-event {
+  max-width: min(78vw, 280px);
+  padding: 7px 12px;
+  border: 1px solid rgba(112,145,188,.2);
+  border-radius: 999px;
+  color: #58769d;
+  background: rgba(237,245,255,.76);
+  box-shadow: 0 7px 18px rgba(54,82,119,.08);
+  white-space: normal;
+}
+
+.cy-paw-event-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: .7rem;
+  line-height: 1.2;
+}
+
+.cy-paw-event-mark svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+.cy-paw-event-actor {
+  color: #7c8fa8;
+}
+
+.cy-paw-event-mark b {
+  color: #45678f;
+  font-weight: 650;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-time {
+  margin-top: 3px;
+  text-align: center;
+  font-size: .56rem;
+  opacity: .62;
+}
+
+body.theme-infernal #conv #cv-msgs .m.cy-paw-event {
+  color: #bcd0ec;
+  border-color: rgba(255,255,255,.1);
+  background: rgba(104,137,183,.15);
+}
+
+body.theme-infernal .cy-paw-event-actor { color: #96abc7; }
+body.theme-infernal .cy-paw-event-mark b { color: #d9e6f7; }
 
 .cy-paw-tools,
 .cy-paw-editor-actions,
@@ -545,6 +618,12 @@ body.theme-infernal #cy-paw-save { color: #fff; background: linear-gradient(145d
 @keyframes cyPulse {
   0%, 100% { opacity: .45; transform: scale(.85); }
   50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes cyPawTap {
+  0% { transform: scale(1); }
+  45% { transform: scale(.86) rotate(-5deg); }
+  100% { transform: scale(1); }
 }
 
 @media (max-width: 390px) {
