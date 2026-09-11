@@ -1,7 +1,7 @@
 /* InternalBeyond Mobile — ib-sw.js（Service Worker 模板 · 联网优先，离线回退）
    与手机端 HTML 放在同一目录，经 HTTPS 访问时页面会自动注册本文件。
    只接管本站的 GET 请求；发往 AI 服务商 / 中转站的请求原样放行、绝不缓存。 */
-const IB_CACHE='ib-cache-v3-cy1';
+const IB_CACHE='ib-cache-v3-cy2';
 const IB_CORE=[
   './',
   './index.html',
