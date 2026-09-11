@@ -5,7 +5,7 @@
   var queue = [];
   var started = false;
 
-  api.version = '0.3.0';
+  api.version = '0.4.0';
   api.register = function (name, initializer) {
     if (typeof initializer !== 'function') return;
     var module = { name: String(name || 'anonymous'), initializer: initializer };
@@ -101,22 +101,81 @@
       }
     }
 
-    function recordPawEvent(action) {
+    function pawUuid() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+      } catch (error) {}
+      return 'paw-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function recordPawEvent(action, context) {
+      var idempotencyKey = pawUuid();
+      var now = new Date();
       var detail = {
-        id: 'paw-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-        type: 'interaction',
-        source: 'cy-paw',
-        action_id: action.id,
+        id: idempotencyKey,
+        type: 'interaction.paw',
+        action: action.id,
         label: action.label,
+        actor: 'yingying',
+        target: 'chen',
+        source: 'chat_input',
         identity_id: localStorage.getItem('ibcy.identity_id') || 'cy',
-        thread_id: localStorage.getItem('ibcy.thread_id') || '',
-        created_at: new Date().toISOString()
+        thread_id: context && context.thread ? String(context.thread.id || '') : '',
+        timestamp: now.toISOString(),
+        created_at: now.toISOString(),
+        idempotency_key: idempotencyKey
       };
       var events = readPawEvents();
       events.push(detail);
       try { localStorage.setItem(PAW_EVENTS_KEY, JSON.stringify(events.slice(-100))); } catch (error) {}
       window.dispatchEvent(new CustomEvent('ibcy:interaction', { detail: detail }));
       return detail;
+    }
+
+    function pawPrompt(detail) {
+      return '[interaction.paw]\n' + JSON.stringify({
+        type: detail.type,
+        action: detail.action,
+        label: detail.label,
+        actor: detail.actor,
+        target: detail.target,
+        source: detail.source,
+        idempotency_key: detail.idempotency_key
+      });
+    }
+
+    function decoratePawMessage(message, root) {
+      if (!message || !message.interaction || message.interaction.type !== 'interaction.paw') return;
+      var host = root || document;
+      var bubble = host.matches && host.matches('.m[data-id="' + message.id + '"]')
+        ? host
+        : host.querySelector && host.querySelector('.m[data-id="' + message.id + '"]');
+      if (!bubble || bubble.classList.contains('cy-paw-event')) return;
+      var row = bubble.closest('.mrow');
+      var text = bubble.querySelector('.m-text');
+      if (row) row.classList.add('cy-paw-event-row');
+      bubble.classList.add('cy-paw-event');
+      if (text) {
+        text.textContent = '';
+        var mark = document.createElement('span');
+        mark.className = 'cy-paw-event-mark';
+        mark.innerHTML = svgPaw();
+        var actor = document.createElement('span');
+        actor.className = 'cy-paw-event-actor';
+        actor.textContent = '莹莹';
+        var label = document.createElement('b');
+        label.textContent = String(message.interaction.label || message.interaction.action || '碰了碰');
+        mark.appendChild(actor);
+        mark.appendChild(label);
+        text.appendChild(mark);
+      }
+    }
+
+    function decorateAllPawMessages() {
+      try {
+        if (typeof _msgs === 'undefined' || !Array.isArray(_msgs)) return;
+        _msgs.forEach(function (message) { decoratePawMessage(message, document); });
+      } catch (error) {}
     }
 
     function installMeta() {
@@ -198,16 +257,121 @@
       var feedback = document.getElementById('cy-paw-feedback');
       var editDraft = [];
       var feedbackTimer = 0;
+      var postQueue = Promise.resolve();
+      var replyTimer = 0;
+      var burstLabel = '';
+      var burstCount = 0;
+      var burstAt = 0;
 
       function makeId() {
         return 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
       }
 
-      function showFeedback(label) {
+      function showFeedback(label, prefix) {
         window.clearTimeout(feedbackTimer);
-        feedback.textContent = '已记下 · ' + label;
+        feedback.textContent = (prefix || '已记下') + ' · ' + label;
         feedback.classList.add('show');
         feedbackTimer = window.setTimeout(function () { feedback.classList.remove('show'); }, 1400);
+      }
+
+      function showTapFeedback(label) {
+        var now = Date.now();
+        if (burstLabel === label && now - burstAt < 1100) burstCount += 1;
+        else { burstLabel = label; burstCount = 1; }
+        burstAt = now;
+        showFeedback(label + (burstCount > 1 ? ' ×' + burstCount : ''), '已送进聊天');
+        paw.classList.remove('tapped');
+        void paw.offsetWidth;
+        paw.classList.add('tapped');
+        window.setTimeout(function () { paw.classList.remove('tapped'); }, 180);
+      }
+
+      async function resolvePawContext() {
+        var cfg = null;
+        var thread = null;
+        var conv = document.getElementById('conv');
+        try {
+          if (conv && conv.classList.contains('open') && typeof _activeCfg !== 'undefined' && _activeCfg && !_activeCfg._group) {
+            cfg = _activeCfg;
+            thread = typeof _activeThread !== 'undefined' ? _activeThread : null;
+          }
+        } catch (error) {}
+        if (cfg) return { cfg: cfg, thread: thread };
+
+        try {
+          var list = typeof _cfgs !== 'undefined' && Array.isArray(_cfgs) ? _cfgs : [];
+          var lastId = localStorage.getItem('ib_hb_lastconv') || '';
+          cfg = list.find(function (item) {
+            return item && !item.archived && typeof cfgName === 'function' && cfgName(item) === '澈';
+          }) || list.find(function (item) {
+            return item && !item.archived && String(item.id || '') === lastId;
+          }) || list.find(function (item) { return item && !item.archived && !item._group; });
+          if (cfg && typeof openConv === 'function') {
+            await openConv(cfg, null);
+            return { cfg: cfg, thread: null };
+          }
+        } catch (error) {}
+        return null;
+      }
+
+      function schedulePawReply(context) {
+        window.clearTimeout(replyTimer);
+        replyTimer = window.setTimeout(function tryReply() {
+          var cfg = context && context.cfg;
+          if (!cfg || cfg._group || !cfg.apiKey) return;
+          try {
+            var currentThread = typeof _activeThread !== 'undefined' && _activeThread ? String(_activeThread.id || '') : '';
+            var eventThread = context.thread ? String(context.thread.id || '') : '';
+            if (typeof _activeCfg === 'undefined' || !_activeCfg || _activeCfg.id !== cfg.id || currentThread !== eventThread) return;
+            if (typeof _sendKeys !== 'undefined' && typeof _keyOf === 'function' && _sendKeys.has(_keyOf(cfg.id, eventThread))) {
+              replyTimer = window.setTimeout(tryReply, 700);
+              return;
+            }
+            if (typeof genReply === 'function') genReply(cfg, { source: 'interaction.paw' });
+          } catch (error) {}
+        }, 700);
+      }
+
+      async function postPawAction(action) {
+        var context = await resolvePawContext();
+        var detail = recordPawEvent(action, context);
+        if (!context || typeof dbPut !== 'function') {
+          showFeedback(action.label, '已保存在本机');
+          return detail;
+        }
+
+        var cfg = context.cfg;
+        var message = {
+          id: 'msg_' + Date.now() + '_paw_' + detail.idempotency_key.replace(/[^a-z0-9]/gi, '').slice(-10),
+          role: 'user',
+          content: pawPrompt(detail),
+          friendId: cfg.id,
+          timestamp: Date.now(),
+          interaction: detail
+        };
+        if (context.thread) message.threadId = context.thread.id;
+        await dbPut('chatMessages', message);
+
+        try {
+          if (typeof _presTouch === 'function') _presTouch();
+          if (typeof _msgs !== 'undefined' && Array.isArray(_msgs) && typeof _activeCfg !== 'undefined' && _activeCfg && _activeCfg.id === cfg.id) {
+            _msgs.push(message);
+            var box = typeof convEl === 'function' ? convEl('cv-msgs') : document.getElementById('cv-msgs');
+            if (box && typeof buildMsgEl === 'function') {
+              var empty = box.querySelector('.empty');
+              if (empty) empty.remove();
+              var row = buildMsgEl(message, _msgs[_msgs.length - 2] || null);
+              decoratePawMessage(message, row);
+              box.appendChild(row);
+              if (typeof _tmCollapseAll === 'function') _tmCollapseAll();
+              if (typeof pinBottom === 'function') pinBottom();
+            }
+          }
+          if (window.IBApps && typeof window.IBApps._emit === 'function') window.IBApps._emit('message', message);
+        } catch (error) {}
+
+        schedulePawReply(context);
+        return detail;
       }
 
       function renderActions() {
@@ -218,8 +382,10 @@
           button.className = 'cy-paw-chip';
           button.textContent = action.label;
           button.addEventListener('click', function () {
-            recordPawEvent(action);
-            showFeedback(action.label);
+            showTapFeedback(action.label);
+            postQueue = postQueue.then(function () { return postPawAction(action); }).catch(function () {
+              showFeedback(action.label, '发送失败');
+            });
           });
           actionsEl.appendChild(button);
         });
@@ -336,10 +502,20 @@
         syncConversation();
       }
 
+      var messageBox = document.getElementById('cv-msgs');
+      if (messageBox && window.MutationObserver) {
+        new MutationObserver(decorateAllPawMessages).observe(messageBox, { childList: true, subtree: true });
+        decorateAllPawMessages();
+      }
+
       renderActions();
       shell.paw = {
         getActions: function () { return copyActions(actions); },
         getEvents: function () { return readPawEvents().slice(); },
+        send: function (action) {
+          var found = actions.find(function (item) { return item.id === action || item.label === action; });
+          return found ? postPawAction(found) : Promise.reject(new Error('未找到这个动作'));
+        },
         resetActions: function () {
           actions = copyActions(DEFAULT_PAW_ACTIONS);
           savePawActions(actions);
