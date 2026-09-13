@@ -1,6 +1,6 @@
 /* InternalBeyond Mobile — CY service worker overlay.
    Keeps upstream index.html untouched and injects the CY shell at response time. */
-const IB_CACHE='ib-cache-v9-cy';
+const IB_CACHE='ib-cache-v10-cy';
 const IB_CORE=[
   './',
   './index.html',
@@ -12,8 +12,6 @@ const IB_CORE=[
   './custom/cy-ob-bridge.js',
   './custom/cy-gateway.css',
   './custom/cy-gateway.js',
-  './custom/cy-codex-auth.css',
-  './custom/cy-codex-auth.js',
   './custom/cy-mutual-paw.css',
   './custom/cy-mutual-paw.js',
   './custom/cy-identity.css',
@@ -21,8 +19,8 @@ const IB_CORE=[
   './apps/catalog.json',
   './apps/catalog.js'
 ];
-const CY_HEAD='<link rel="stylesheet" href="./custom/cy-shell.css?v=0.5.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-mutual-paw.css?v=0.2.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-identity.css?v=0.1.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-codex-auth.css?v=0.1.0" data-ibcy-loader="1">';
-const CY_BODY='<script src="./custom/cy-shell.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-ob-bridge.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-mutual-paw.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-identity.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-codex-auth.js?v=0.1.0" data-ibcy-loader="1"></script>';
+const CY_HEAD='<link rel="stylesheet" href="./custom/cy-shell.css?v=0.5.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-mutual-paw.css?v=0.2.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-identity.css?v=0.1.0" data-ibcy-loader="1">';
+const CY_BODY='<script src="./custom/cy-shell.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-ob-bridge.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-mutual-paw.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-identity.js?v=0.1.0" data-ibcy-loader="1"></script>';
 
 function injectCY(response){
   if(!response||!response.ok)return Promise.resolve(response);
