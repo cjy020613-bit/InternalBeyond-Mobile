@@ -29,6 +29,7 @@ jobs:
           node --check custom/cy-shell.js
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
+          node --check custom/cy-gateway-defaults.js
           node --check custom/cy-mutual-paw.js
           node --check custom/cy-identity.js
           node --check apps/catalog.js
@@ -37,6 +38,7 @@ jobs:
       - name: Check Python syntax
         run: |
           python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/store.py
+          python -c "from openai_codex import AsyncCodex, Sandbox; assert AsyncCodex and Sandbox"
       - name: Check runtime files
         run: |
           node scripts/check.mjs
