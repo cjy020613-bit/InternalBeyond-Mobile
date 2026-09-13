@@ -1,1 +1,29 @@
 /* CY paw alignment fix: keep interaction rows on the upstream message layout grid. */
+#conv #cv-msgs .mrow.cy-paw-event-row .m-body {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying,
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying .m-body {
+  flex-direction: row-reverse !important;
+  justify-content: flex-start !important;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen .m-body {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying .m-col {
+  align-items: flex-end !important;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen .m-col {
+  align-items: flex-start !important;
+}
