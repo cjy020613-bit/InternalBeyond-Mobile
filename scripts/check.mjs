@@ -16,6 +16,7 @@ const requiredFiles = [
   'custom/cy-mutual-paw.css',
   'custom/cy-mutual-paw.js',
   'custom/cy-interaction-lexicon.js',
+  'custom/cy-interaction-protocol-v2.js',
   'custom/cy-interaction-editor.css',
   'custom/cy-identity.css',
   'custom/cy-identity.js',
@@ -30,12 +31,13 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map((file) => access(file)));
 
-const [manifestText, catalogText, serviceWorker, mutualPaw, lexicon, identity, chatPolish, chatPolishCss, editorCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
+const [manifestText, catalogText, serviceWorker, mutualPaw, lexicon, protocolV2, identity, chatPolish, chatPolishCss, editorCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
   readFile('manifest.webmanifest', 'utf8'),
   readFile('apps/catalog.json', 'utf8'),
   readFile('ib-sw.js', 'utf8'),
   readFile('custom/cy-mutual-paw.js', 'utf8'),
   readFile('custom/cy-interaction-lexicon.js', 'utf8'),
+  readFile('custom/cy-interaction-protocol-v2.js', 'utf8'),
   readFile('custom/cy-identity.js', 'utf8'),
   readFile('custom/cy-chat-polish.js', 'utf8'),
   readFile('custom/cy-chat-polish.css', 'utf8'),
@@ -55,6 +57,7 @@ for (const asset of [
   './custom/cy-mutual-paw.css',
   './custom/cy-mutual-paw.js',
   './custom/cy-interaction-lexicon.js',
+  './custom/cy-interaction-protocol-v2.js',
   './custom/cy-interaction-editor.css',
   './custom/cy-identity.css',
   './custom/cy-identity.js',
@@ -69,6 +72,9 @@ if (!mutualPaw.includes('CY_MUTUAL_PAW') || !mutualPaw.includes('shell.paw.recei
 }
 if (!lexicon.includes('ibcy.interaction.lexicon.v1') || !lexicon.includes('sendInteraction') || !lexicon.includes('receiveInteraction') || !lexicon.includes('body_target')) {
   throw new Error('shared interaction lexicon is incomplete');
+}
+if (!protocolV2.includes('CY_INTERACTION_RUNTIME') || !protocolV2.includes('body_target') || !protocolV2.includes('receiveInteraction') || !protocolV2.includes('interaction-lexicon-change')) {
+  throw new Error('dynamic interaction protocol v2 is incomplete');
 }
 if (!identity.includes('shell.identity') || !identity.includes('ibcy.identity.profiles.v1')) {
   throw new Error('identity avatar layer is incomplete');
@@ -104,4 +110,4 @@ if (!manifest.name || !manifest.short_name || !manifest.start_url) throw new Err
 if (!Array.isArray(manifest.icons) || manifest.icons.length < 2) throw new Error('PWA icons are incomplete');
 if (!Array.isArray(catalog.apps)) throw new Error('apps/catalog.json has no apps array');
 
-console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), editable shared interactions + one-avatar turns + chat polish + mutual paw + identity + official Codex login enabled`);
+console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), dynamic interaction protocol v2 + editable shared interactions + one-avatar turns + chat polish + mutual paw + identity + official Codex login enabled`);
