@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -25,7 +29,6 @@ jobs:
           node --check custom/cy-shell.js
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
-          node --check custom/cy-codex-auth.js
           node --check custom/cy-mutual-paw.js
           node --check custom/cy-identity.js
           node --check apps/catalog.js
