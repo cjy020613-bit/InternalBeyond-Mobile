@@ -1,0 +1,43 @@
+/* CY native avatar bridge: let InternalBeyond own avatar rendering and sender grouping. */
+
+/* Custom avatar nodes from the older CY overlay are intentionally suppressed. */
+#conv #cv-msgs .cy-chat-avatar,
+#conv #cv-msgs .cy-paw-row-avatar {
+  display: none !important;
+}
+
+/* Restore upstream message-row geometry even if the legacy CY observer still tags the row. */
+#conv #cv-msgs .mrow.cy-chat-identity-row {
+  align-self: stretch !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  width: auto !important;
+  gap: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  justify-content: initial !important;
+  align-items: initial !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row .m-body {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 9px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.user .m-body {
+  flex-direction: row-reverse !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.ai .m-body {
+  flex-direction: row !important;
+}
+
+/* Upstream buildMsgEl/_sameSender decides when an avatar is shown for a message turn. */
+#conv #cv-msgs .mrow.cy-chat-identity-row.cont {
+  margin-top: 1px !important;
+}
