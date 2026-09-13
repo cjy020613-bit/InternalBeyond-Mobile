@@ -33,6 +33,11 @@
   box-shadow: 0 5px 13px rgba(54,82,119,.12), inset 0 1px 0 rgba(255,255,255,.9);
 }
 
+#conv #cv-msgs .mrow.cy-chat-identity-row > .cy-chat-avatar.cy-chat-avatar-placeholder {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 #conv #cv-msgs .mrow.cy-chat-identity-row > .cy-chat-avatar[data-actor="chen"] {
   color: #455f81;
   background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(224,233,246,.94));
