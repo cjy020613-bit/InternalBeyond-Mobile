@@ -1,6 +1,22 @@
+#conv #cv-msgs .mrow.cy-paw-event-row {
+  align-self: stretch;
+  width: 100%;
+  margin: 3px 0;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-body {
+  width: auto;
+  max-width: min(78vw, 300px);
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-col {
+  max-width: 100%;
+}
+
 #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying {
   justify-content: flex-end;
-  padding-left: 16%;
+  padding-left: 22%;
+  padding-right: 4px;
 }
 
 #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying .m-body {
@@ -13,7 +29,8 @@
 
 #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen {
   justify-content: flex-start;
-  padding-right: 16%;
+  padding-left: 4px;
+  padding-right: 22%;
 }
 
 #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen .m-body {
@@ -24,68 +41,200 @@
   align-items: flex-start;
 }
 
-#conv #cv-msgs .mrow.cy-paw-from-yingying .m.cy-paw-event {
-  color: #f5f8fc;
-  border-color: transparent;
-  background: linear-gradient(145deg, #607b9f, #476486);
-  box-shadow: 0 8px 20px rgba(54,82,119,.14);
+#conv #cv-msgs .mrow.cy-paw-event-row .m.cy-paw-event {
+  position: relative;
+  min-width: 108px;
+  max-width: min(70vw, 250px);
+  padding: 9px 12px 8px;
+  border-radius: 18px;
+  white-space: normal;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
 }
 
-#conv #cv-msgs .mrow.cy-paw-from-yingying .cy-paw-event-actor,
-#conv #cv-msgs .mrow.cy-paw-from-yingying .cy-paw-event-mark b {
-  color: inherit;
+#conv #cv-msgs .mrow.cy-paw-from-yingying .m.cy-paw-event {
+  color: #35577f;
+  border: 1px solid rgba(113, 154, 210, .22);
+  border-radius: 18px 18px 7px 18px;
+  background: linear-gradient(145deg, rgba(235, 245, 255, .95), rgba(216, 232, 252, .84));
+  box-shadow: 0 7px 18px rgba(54, 82, 119, .08), inset 0 1px 0 rgba(255,255,255,.7);
 }
 
 #conv #cv-msgs .mrow.cy-paw-from-chen .m.cy-paw-event {
-  border-color: rgba(112,145,188,.14);
-  background: rgba(255,255,255,.72);
-  box-shadow: 0 7px 18px rgba(54,82,119,.06);
+  color: #3f628a;
+  border: 1px solid rgba(112, 145, 188, .13);
+  border-radius: 18px 18px 18px 7px;
+  background: rgba(255, 255, 255, .76);
+  box-shadow: 0 7px 18px rgba(54, 82, 119, .055), inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+.cy-paw-event-mark {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 7px;
+  row-gap: 2px;
+  min-width: 0;
+  line-height: 1;
 }
 
 .cy-paw-mini,
 .cy-paw-sparkle {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   display: inline-flex;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   align-items: center;
   justify-content: center;
+  align-self: center;
   flex: 0 0 auto;
+  color: #7397c4;
 }
 
 .cy-paw-mini svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   fill: currentColor;
 }
 
 .cy-paw-sparkle {
-  color: #8da0ba;
-  font-size: .7rem;
+  color: #8ba3c1;
+  font-size: .72rem;
+}
+
+.cy-paw-event-mark b {
+  grid-column: 2;
+  grid-row: 1;
+  overflow: hidden;
+  color: inherit;
+  font: 650 .84rem/1.05 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cy-paw-event-actor {
+  grid-column: 2;
+  grid-row: 2;
+  color: #8093aa;
+  font: 500 .56rem/1.05 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  letter-spacing: .02em;
+  opacity: .72;
 }
 
 .cy-paw-event-count {
-  margin-left: 2px;
-  opacity: .72;
-  font-size: .62rem;
-  font-weight: 650;
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin-left: 3px;
+  padding: 4px 7px 3px;
+  border-radius: 999px;
+  color: #5f80a8;
+  background: rgba(102, 142, 195, .13);
+  font-size: .57rem;
+  font-weight: 680;
+  line-height: 1;
+  opacity: 1;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-yingying .cy-paw-event-actor {
+  color: #7890aa;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-chen .cy-paw-event-actor {
+  color: #8b99ab;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row .m-time {
+  margin-top: 2px;
+  color: #91a0b3;
+  font-size: .52rem;
+  opacity: .48;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-yingying .m-time {
+  text-align: right;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-chen .m-time {
+  text-align: left;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row + .mrow.cy-paw-event-row {
+  margin-top: 1px;
 }
 
 #conv #cv-msgs .mrow.cy-paw-command-only {
   display: none !important;
 }
 
+/* Keep the shortcut available without letting it compete with the composer. */
+#cy-paw {
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(86px + var(--cy-safe-bottom));
+  width: 46px;
+  height: 46px;
+  border-radius: 17px;
+  opacity: .92;
+  box-shadow: 0 10px 26px rgba(54,82,119,.17), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+#cy-paw svg {
+  width: 21px;
+  height: 21px;
+}
+
+#cy-paw > span {
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+}
+
+body.cy-conversation-open #cy-paw {
+  bottom: calc(86px + var(--cy-safe-bottom));
+}
+
 body.theme-infernal #conv #cv-msgs .mrow.cy-paw-from-yingying .m.cy-paw-event {
-  color: #f3f7fd;
-  background: linear-gradient(145deg, #5e789c, #405a7c);
+  color: #e2ebf8;
+  border-color: rgba(150,180,221,.12);
+  background: linear-gradient(145deg, rgba(80,108,146,.54), rgba(54,78,109,.46));
 }
 
 body.theme-infernal #conv #cv-msgs .mrow.cy-paw-from-chen .m.cy-paw-event {
   color: #dbe6f5;
-  border-color: rgba(255,255,255,.1);
-  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.09);
+  background: rgba(255,255,255,.055);
+}
+
+body.theme-infernal .cy-paw-event-actor {
+  color: #9fb0c6 !important;
+}
+
+body.theme-infernal .cy-paw-event-count {
+  color: #c6d6eb;
+  background: rgba(255,255,255,.08);
 }
 
 @media (max-width: 390px) {
-  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying { padding-left: 9%; }
-  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen { padding-right: 9%; }
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying {
+    padding-left: 12%;
+  }
+
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen {
+    padding-right: 12%;
+  }
+
+  #conv #cv-msgs .mrow.cy-paw-event-row .m.cy-paw-event {
+    min-width: 102px;
+    max-width: 74vw;
+  }
+
+  #cy-paw {
+    right: calc(14px + env(safe-area-inset-right, 0px));
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+  }
 }
