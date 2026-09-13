@@ -42,7 +42,8 @@ async def main() -> None:
         return
 
     try:
-        status = await asyncio.wait_for(client.status(), timeout=18)
+        # Read-only smoke test first so OmbreClient.call() can flatten nested transport errors.
+        await asyncio.wait_for(client.search("测试", max_results=1), timeout=18)
     except asyncio.TimeoutError:
         print("[CY_OB_PROBE] configured=1 online=0 category=timeout", flush=True)
         return
@@ -53,10 +54,22 @@ async def main() -> None:
         )
         return
 
+    try:
+        status = await asyncio.wait_for(client.status(), timeout=18)
+    except asyncio.TimeoutError:
+        print("[CY_OB_PROBE] configured=1 online=1 search_call=ok tools=unknown status_category=timeout", flush=True)
+        return
+    except Exception as exc:
+        print(
+            f"[CY_OB_PROBE] configured=1 online=1 search_call=ok tools=unknown status_category={classify_error(exc)} detail={safe_detail(exc)}",
+            flush=True,
+        )
+        return
+
     if not status.get("online"):
         error = status.get("error")
         print(
-            f"[CY_OB_PROBE] configured=1 online=0 category={classify_error(error)} detail={safe_detail(error)}",
+            f"[CY_OB_PROBE] configured=1 online=1 search_call=ok tools=unknown status_category={classify_error(error)} detail={safe_detail(error)}",
             flush=True,
         )
         return
@@ -64,28 +77,8 @@ async def main() -> None:
     tools = {str(item) for item in status.get("tools") or []}
     has_search = "breath_search" in tools
     has_hold = "hold" in tools
-    if not has_search:
-        print(
-            f"[CY_OB_PROBE] configured=1 online=1 search=0 hold={int(has_hold)} tools={len(tools)}",
-            flush=True,
-        )
-        return
-
-    try:
-        # Read-only smoke test. The returned memory content is deliberately discarded.
-        await asyncio.wait_for(client.search("测试", max_results=1), timeout=18)
-        search_call = "ok"
-        search_detail = ""
-    except asyncio.TimeoutError:
-        search_call = "timeout"
-        search_detail = ""
-    except Exception as exc:
-        search_call = classify_error(exc)
-        search_detail = safe_detail(exc)
-
-    suffix = f" detail={search_detail}" if search_detail else ""
     print(
-        f"[CY_OB_PROBE] configured=1 online=1 search=1 hold={int(has_hold)} tools={len(tools)} search_call={search_call}{suffix}",
+        f"[CY_OB_PROBE] configured=1 online=1 search={int(has_search)} hold={int(has_hold)} tools={len(tools)} search_call=ok",
         flush=True,
     )
 
