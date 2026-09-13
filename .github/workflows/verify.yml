@@ -31,7 +31,9 @@ jobs:
           node --check custom/cy-gateway.js
           node --check custom/cy-gateway-defaults.js
           node --check custom/cy-mutual-paw.js
+          node --check custom/cy-interaction-lexicon.js
           node --check custom/cy-identity.js
+          node --check custom/cy-chat-polish.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js

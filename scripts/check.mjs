@@ -15,6 +15,8 @@ const requiredFiles = [
   'custom/cy-gateway-defaults.js',
   'custom/cy-mutual-paw.css',
   'custom/cy-mutual-paw.js',
+  'custom/cy-interaction-lexicon.js',
+  'custom/cy-interaction-editor.css',
   'custom/cy-identity.css',
   'custom/cy-identity.js',
   'custom/cy-chat-polish.css',
@@ -28,14 +30,16 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map((file) => access(file)));
 
-const [manifestText, catalogText, serviceWorker, mutualPaw, identity, chatPolish, chatPolishCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
+const [manifestText, catalogText, serviceWorker, mutualPaw, lexicon, identity, chatPolish, chatPolishCss, editorCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
   readFile('manifest.webmanifest', 'utf8'),
   readFile('apps/catalog.json', 'utf8'),
   readFile('ib-sw.js', 'utf8'),
   readFile('custom/cy-mutual-paw.js', 'utf8'),
+  readFile('custom/cy-interaction-lexicon.js', 'utf8'),
   readFile('custom/cy-identity.js', 'utf8'),
   readFile('custom/cy-chat-polish.js', 'utf8'),
   readFile('custom/cy-chat-polish.css', 'utf8'),
+  readFile('custom/cy-interaction-editor.css', 'utf8'),
   readFile('custom/cy-gateway.js', 'utf8'),
   readFile('custom/cy-gateway-defaults.js', 'utf8'),
   readFile('gateway/codex_bridge.py', 'utf8'),
@@ -50,6 +54,8 @@ for (const asset of [
   './custom/cy-gateway-defaults.js',
   './custom/cy-mutual-paw.css',
   './custom/cy-mutual-paw.js',
+  './custom/cy-interaction-lexicon.js',
+  './custom/cy-interaction-editor.css',
   './custom/cy-identity.css',
   './custom/cy-identity.js',
   './custom/cy-chat-polish.css',
@@ -61,6 +67,9 @@ if (!serviceWorker.includes('data-ibcy-loader')) throw new Error('ib-sw.js is mi
 if (!mutualPaw.includes('CY_MUTUAL_PAW') || !mutualPaw.includes('shell.paw.receive')) {
   throw new Error('mutual paw protocol is incomplete');
 }
+if (!lexicon.includes('ibcy.interaction.lexicon.v1') || !lexicon.includes('sendInteraction') || !lexicon.includes('receiveInteraction') || !lexicon.includes('body_target')) {
+  throw new Error('shared interaction lexicon is incomplete');
+}
 if (!identity.includes('shell.identity') || !identity.includes('ibcy.identity.profiles.v1')) {
   throw new Error('identity avatar layer is incomplete');
 }
@@ -69,6 +78,9 @@ if (!chatPolish.includes('cy-chat-identity-row') || !chatPolish.includes('cy-com
 }
 if (!chatPolish.includes('cy-chat-turn-start') || !chatPolish.includes('cy-chat-avatar-placeholder') || !chatPolishCss.includes('cy-chat-avatar-placeholder')) {
   throw new Error('one-avatar-per-turn grouping is incomplete');
+}
+if (!chatPolish.includes('cy-compose-edit') || !chatPolish.includes('saveLexicon') || !editorCss.includes('cy-compose-editor-row')) {
+  throw new Error('editable interaction composer is incomplete');
 }
 if (!gatewayUi.includes('/v1/codex/login/device') || !gatewayUi.includes('登录 ChatGPT')) {
   throw new Error('Codex device-login UI is incomplete');
@@ -92,4 +104,4 @@ if (!manifest.name || !manifest.short_name || !manifest.start_url) throw new Err
 if (!Array.isArray(manifest.icons) || manifest.icons.length < 2) throw new Error('PWA icons are incomplete');
 if (!Array.isArray(catalog.apps)) throw new Error('apps/catalog.json has no apps array');
 
-console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), one-avatar turns + chat polish + mutual paw + identity + official Codex login enabled`);
+console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), editable shared interactions + one-avatar turns + chat polish + mutual paw + identity + official Codex login enabled`);
