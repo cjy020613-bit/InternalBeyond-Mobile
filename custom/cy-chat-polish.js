@@ -56,31 +56,56 @@
       return map;
     }
 
+    function actorOf(message) {
+      var role = String(message && message.role || '').toLowerCase();
+      if (role !== 'user' && role !== 'assistant') return '';
+      var actor = role === 'user' ? 'yingying' : 'chen';
+      if (message.interaction && message.interaction.actor === 'chen') actor = 'chen';
+      if (message.interaction && message.interaction.actor === 'yingying') actor = 'yingying';
+      return actor;
+    }
+
     function decorateMessages() {
       var box = document.getElementById('cv-msgs');
       if (!box) return;
       var messages = roleMap();
+      var entries = [];
+
       box.querySelectorAll('.m[data-id]').forEach(function (bubble) {
         var message = messages[String(bubble.getAttribute('data-id') || '')];
         if (!message) return;
-        var role = String(message.role || '').toLowerCase();
-        if (role !== 'user' && role !== 'assistant') return;
-        var actor = role === 'user' ? 'yingying' : 'chen';
-        if (message.interaction && message.interaction.actor === 'chen') actor = 'chen';
-        if (message.interaction && message.interaction.actor === 'yingying') actor = 'yingying';
+        var actor = actorOf(message);
+        if (!actor) return;
         var row = bubble.closest('.mrow');
-        if (!row) return;
+        if (!row || row.classList.contains('cy-paw-command-only')) return;
 
         row.classList.add('cy-chat-identity-row');
         row.classList.toggle('cy-chat-from-yingying', actor === 'yingying');
         row.classList.toggle('cy-chat-from-chen', actor === 'chen');
         row.classList.toggle('cy-paw-from-yingying', actor === 'yingying' && row.classList.contains('cy-paw-event-row'));
         row.classList.toggle('cy-paw-from-chen', actor === 'chen' && row.classList.contains('cy-paw-event-row'));
+        entries.push({ row: row, actor: actor });
+      });
 
+      var previousActor = '';
+      entries.forEach(function (entry) {
+        var row = entry.row;
+        var actor = entry.actor;
+        var startsTurn = actor !== previousActor;
+
+        row.classList.toggle('cy-chat-turn-start', startsTurn);
+        row.classList.toggle('cy-chat-turn-follow', !startsTurn);
         row.querySelectorAll(':scope > .cy-chat-avatar').forEach(function (node) { node.remove(); });
+
         var avatar = avatarNode(actor);
+        if (!startsTurn) {
+          avatar.classList.add('cy-chat-avatar-placeholder');
+          avatar.setAttribute('aria-hidden', 'true');
+          avatar.removeAttribute('aria-label');
+        }
         if (actor === 'chen') row.insertBefore(avatar, row.firstChild);
         else row.appendChild(avatar);
+        previousActor = actor;
       });
     }
 
