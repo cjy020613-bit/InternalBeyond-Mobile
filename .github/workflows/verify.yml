@@ -39,6 +39,7 @@ jobs:
           node --check custom/cy-identity.js
           node --check custom/cy-chat-polish.js
           node --check custom/cy-friends-template.js
+          node --check custom/cy-friends-template-bridge.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js
