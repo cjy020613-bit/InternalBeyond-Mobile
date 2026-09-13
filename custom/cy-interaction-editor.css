@@ -1,0 +1,161 @@
+/* CY shared interaction editor */
+
+.cy-compose-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cy-compose-heading > small {
+  color: #8a98ab;
+  font-size: .64rem;
+}
+
+.cy-compose-edit {
+  min-width: 42px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(110,145,190,.14);
+  border-radius: 999px;
+  color: #6c82a1;
+  background: rgba(255,255,255,.56);
+  font: 560 .62rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+#cy-compose-actions-heading {
+  margin-top: 2px;
+}
+
+#cy-paw-panel #cy-paw-edit,
+#cy-paw-panel #cy-paw-editor {
+  display: none !important;
+}
+
+.cy-compose-editor {
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid rgba(112,145,188,.13);
+  border-radius: 19px;
+  background: rgba(255,255,255,.48);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86);
+}
+
+.cy-compose-editor[hidden] {
+  display: none !important;
+}
+
+.cy-compose-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cy-compose-editor-head b {
+  color: #415f82;
+  font-size: .76rem;
+}
+
+.cy-compose-editor-head button {
+  border: 0;
+  color: #8394aa;
+  background: transparent;
+  font-size: .62rem;
+}
+
+.cy-compose-editor-list {
+  display: grid;
+  gap: 7px;
+}
+
+.cy-compose-editor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 31px 31px 36px;
+  gap: 6px;
+  align-items: center;
+}
+
+.cy-compose-editor-row input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(111,145,188,.15);
+  border-radius: 11px;
+  outline: none;
+  color: #3f5878;
+  background: rgba(255,255,255,.78);
+  font: 540 .72rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.cy-compose-editor-row input:focus {
+  border-color: rgba(92,134,188,.35);
+  box-shadow: 0 0 0 3px rgba(102,150,211,.08);
+}
+
+.cy-compose-editor-row button {
+  height: 31px;
+  padding: 0;
+  border: 1px solid rgba(111,145,188,.12);
+  border-radius: 9px;
+  color: #7186a1;
+  background: rgba(255,255,255,.62);
+  font-size: .68rem;
+}
+
+.cy-compose-editor-row button:disabled {
+  opacity: .32;
+}
+
+.cy-compose-editor-row button.danger {
+  color: #b46f79;
+}
+
+.cy-compose-editor-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.cy-compose-editor-tools button {
+  height: 35px;
+  border: 1px solid rgba(111,145,188,.13);
+  border-radius: 11px;
+  color: #6f84a0;
+  background: rgba(255,255,255,.62);
+  font: 560 .66rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.cy-compose-editor-tools button.primary {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(145deg, #7f9eca, #6082b0);
+}
+
+body.theme-infernal .cy-compose-editor {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.045);
+}
+
+body.theme-infernal .cy-compose-edit,
+body.theme-infernal .cy-compose-editor-row input,
+body.theme-infernal .cy-compose-editor-row button,
+body.theme-infernal .cy-compose-editor-tools button {
+  color: #c4d2e6;
+  border-color: rgba(255,255,255,.09);
+  background: rgba(255,255,255,.055);
+}
+
+@media (max-width: 390px) {
+  .cy-compose-editor-row {
+    grid-template-columns: minmax(0, 1fr) 29px 29px 34px;
+    gap: 5px;
+  }
+
+  .cy-compose-editor {
+    padding: 11px;
+  }
+}
