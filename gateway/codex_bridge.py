@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-import json
+import dataclasses
+import enum
 import os
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, AsyncIterator
 
@@ -12,143 +12,264 @@ class RpcError(RuntimeError):
     pass
 
 
-class CodexBridge:
-    """One long-lived `codex app-server` process shared by browser sessions."""
+def _jsonable(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, enum.Enum):
+        return value.value
+    if hasattr(value, "model_dump"):
+        try:
+            return value.model_dump(mode="json", by_alias=True, exclude_none=True)
+        except TypeError:
+            return value.model_dump()
+    if dataclasses.is_dataclass(value):
+        return dataclasses.asdict(value)
+    if isinstance(value, dict):
+        return {str(k): _jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_jsonable(v) for v in value]
+    if hasattr(value, "__dict__"):
+        return {str(k): _jsonable(v) for k, v in vars(value).items() if not k.startswith("_")}
+    return str(value)
 
-    def __init__(self, codex_bin: str = "codex", codex_home: str | None = None) -> None:
-        self.codex_bin, self.codex_home = codex_bin, codex_home
-        self.process: asyncio.subprocess.Process | None = None
-        self._reader_task: asyncio.Task[None] | None = None
-        self._next_id = 1
-        self._pending: dict[int, asyncio.Future[Any]] = {}
-        self._thread_queues: dict[str, set[asyncio.Queue[dict[str, Any]]]] = defaultdict(set)
-        self._active_threads: set[str] = set()
-        self._write_lock, self._start_lock = asyncio.Lock(), asyncio.Lock()
+
+class CodexBridge:
+    """Long-lived wrapper around the official `openai-codex` Python SDK.
+
+    The SDK owns the matching Codex runtime and reuses ChatGPT/Codex account auth
+    from CODEX_HOME. The browser never receives OpenAI credentials.
+    """
+
+    def __init__(self, codex_home: str | None = None) -> None:
+        self.codex_home = codex_home
+        self.client: Any = None
+        self._start_lock = asyncio.Lock()
+        self._threads: dict[str, Any] = {}
+        self._login_handles: dict[str, Any] = {}
+        self._login_states: dict[str, dict[str, Any]] = {}
+        self._login_tasks: dict[str, asyncio.Task[None]] = {}
         self.last_usage: dict[str, Any] = {}
 
     async def start(self) -> None:
         async with self._start_lock:
-            if self.process and self.process.returncode is None:
+            if self.client is not None:
                 return
-            self._active_threads.clear()
-            env = os.environ.copy()
-            for key in ("OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "OPENAI_BASE_URL", "OPENAI_API_BASE"):
-                env.pop(key, None)
             if self.codex_home:
                 Path(self.codex_home).mkdir(parents=True, exist_ok=True)
-                env["CODEX_HOME"] = self.codex_home
-            self.process = await asyncio.create_subprocess_exec(
-                self.codex_bin, "app-server", stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=env)
-            self._reader_task = asyncio.create_task(self._read_loop())
-            asyncio.create_task(self._drain_stderr())
-            await self.request("initialize", {"clientInfo": {"name": "internal-beyond-gateway", "version": "0.1.0"},
-                                              "capabilities": {"experimentalApi": True}})
-            await self.notify("initialized", {})
+                os.environ["CODEX_HOME"] = self.codex_home
+            # This gateway intentionally uses ChatGPT/Codex login rather than API billing.
+            for key in ("OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "OPENAI_BASE_URL", "OPENAI_API_BASE"):
+                os.environ.pop(key, None)
+            try:
+                from openai_codex import AsyncCodex
+            except ImportError as exc:
+                raise RpcError("openai-codex is not installed") from exc
+            try:
+                client = AsyncCodex()
+                await client.__aenter__()
+                self.client = client
+            except Exception as exc:
+                raise RpcError(f"Unable to start Codex SDK: {exc}") from exc
 
     async def stop(self) -> None:
-        if self.process and self.process.returncode is None:
-            self.process.terminate()
+        for task in list(self._login_tasks.values()):
+            if not task.done():
+                task.cancel()
+        self._login_tasks.clear()
+        self._login_handles.clear()
+        self._threads.clear()
+        if self.client is not None:
+            client, self.client = self.client, None
             try:
-                await asyncio.wait_for(self.process.wait(), 5)
-            except asyncio.TimeoutError:
-                self.process.kill()
-        if self._reader_task:
-            self._reader_task.cancel()
+                await client.__aexit__(None, None, None)
+            except Exception:
+                try:
+                    await client.close()
+                except Exception:
+                    pass
 
-    async def _send(self, payload: dict[str, Any]) -> None:
-        if not self.process or not self.process.stdin:
-            raise RpcError("Codex App Server is unavailable")
-        async with self._write_lock:
-            self.process.stdin.write((json.dumps(payload, ensure_ascii=False) + "\n").encode())
-            await self.process.stdin.drain()
-
-    async def request(self, method: str, params: dict[str, Any] | None = None) -> Any:
-        if not self.process or self.process.returncode is not None:
-            await self.start()
-        request_id = self._next_id
-        self._next_id += 1
-        future = asyncio.get_running_loop().create_future()
-        self._pending[request_id] = future
-        await self._send({"jsonrpc": "2.0", "id": request_id, "method": method, "params": params or {}})
+    async def _sandbox(self) -> Any:
         try:
-            return await asyncio.wait_for(future, 120)
-        finally:
-            self._pending.pop(request_id, None)
+            from openai_codex import Sandbox
+            return Sandbox.read_only
+        except ImportError as exc:
+            raise RpcError("openai-codex is not installed") from exc
 
-    async def notify(self, method: str, params: dict[str, Any] | None = None) -> None:
-        await self._send({"jsonrpc": "2.0", "method": method, "params": params or {}})
+    async def start_thread(
+        self,
+        model: str,
+        cwd: str,
+        base_instructions: str = "",
+        developer_instructions: str = "",
+    ) -> str:
+        await self.start()
+        try:
+            thread = await self.client.thread_start(
+                model=model or None,
+                cwd=cwd,
+                sandbox=await self._sandbox(),
+                base_instructions=base_instructions or None,
+                developer_instructions=developer_instructions or None,
+                ephemeral=False,
+            )
+            thread_id = str(getattr(thread, "id", "") or "")
+            if not thread_id:
+                raise RpcError("Codex SDK returned no thread id")
+            self._threads[thread_id] = thread
+            return thread_id
+        except Exception as exc:
+            if isinstance(exc, RpcError):
+                raise
+            raise RpcError(f"thread_start failed: {exc}") from exc
 
-    async def _read_loop(self) -> None:
-        assert self.process and self.process.stdout
-        while True:
-            raw = await self.process.stdout.readline()
-            if not raw:
-                error = RpcError("Codex App Server exited")
-                for future in list(self._pending.values()):
-                    if not future.done(): future.set_exception(error)
-                return
-            try: message = json.loads(raw)
-            except json.JSONDecodeError: continue
-            if "id" in message:
-                future = self._pending.get(int(message["id"]))
-                if future and not future.done():
-                    if message.get("error"): future.set_exception(RpcError(json.dumps(message["error"], ensure_ascii=False)))
-                    else: future.set_result(message.get("result"))
-                continue
-            params = message.get("params") or {}
-            thread_id = self._thread_id(params)
-            method = str(message.get("method", ""))
-            if "usage" in method.lower() or "token" in method.lower(): self.last_usage = params
-            if thread_id:
-                for queue in list(self._thread_queues.get(thread_id, ())): await queue.put(message)
-
-    async def _drain_stderr(self) -> None:
-        assert self.process and self.process.stderr
-        while await self.process.stderr.readline(): pass
-
-    @staticmethod
-    def _thread_id(params: dict[str, Any]) -> str:
-        thread, turn = params.get("thread") or {}, params.get("turn") or {}
-        return str(params.get("threadId") or params.get("thread_id") or thread.get("id") or turn.get("threadId") or "")
-
-    @staticmethod
-    def _result_id(result: Any, noun: str) -> str:
-        if not isinstance(result, dict): return ""
-        nested = result.get(noun) if isinstance(result.get(noun), dict) else {}
-        return str(result.get(f"{noun}Id") or result.get(f"{noun}_id") or nested.get("id") or result.get("id") or "")
-
-    async def start_thread(self, model: str, cwd: str) -> str:
-        result = await self.request("thread/start", {"model": model, "cwd": cwd,
-                                    "approvalPolicy": "never", "sandbox": "workspace-write",
-                                    "experimentalRawEvents": False})
-        thread_id = self._result_id(result, "thread")
-        if not thread_id: raise RpcError("thread/start returned no thread id")
-        self._active_threads.add(thread_id)
-        return thread_id
-
-    async def resume_thread(self, thread_id: str) -> None:
-        if thread_id in self._active_threads: return
-        await self.request("thread/resume", {"threadId": thread_id})
-        self._active_threads.add(thread_id)
+    async def resume_thread(
+        self,
+        thread_id: str,
+        model: str = "",
+        cwd: str = "",
+        base_instructions: str = "",
+        developer_instructions: str = "",
+    ) -> None:
+        await self.start()
+        if thread_id in self._threads:
+            return
+        try:
+            thread = await self.client.thread_resume(
+                thread_id,
+                model=model or None,
+                cwd=cwd or None,
+                sandbox=await self._sandbox(),
+                base_instructions=base_instructions or None,
+                developer_instructions=developer_instructions or None,
+                include_turns=False,
+            )
+            self._threads[thread_id] = thread
+        except Exception as exc:
+            raise RpcError(f"thread_resume failed: {exc}") from exc
 
     async def stream_turn(self, thread_id: str, text: str, model: str) -> AsyncIterator[dict[str, Any]]:
-        queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
-        self._thread_queues[thread_id].add(queue)
+        """Compatibility stream used by the existing HTTP layer.
+
+        Version one deliberately returns one final text chunk. That gives us a
+        reliable subscription-backed chat first; token streaming can be added on
+        top of the SDK's TurnHandle later without changing the browser contract.
+        """
+        await self.start()
+        thread = self._threads.get(thread_id)
+        if thread is None:
+            raise RpcError("thread is not active; resume it before starting a turn")
         try:
-            result = await self.request("turn/start", {"threadId": thread_id, "model": model,
-                                        "input": [{"type": "text", "text": text}]})
-            yield {"type": "turn.started", "turn_id": self._result_id(result, "turn")}
-            while True:
-                event = self.normalize_event(await asyncio.wait_for(queue.get(), 600))
-                if event:
-                    yield event
-                    if event["type"] in {"turn.completed", "turn.failed"}: return
+            result = await thread.run(text, model=model or None, sandbox=await self._sandbox())
+        except Exception as exc:
+            raise RpcError(f"Codex turn failed: {exc}") from exc
+
+        turn_id = str(getattr(result, "id", "") or "")
+        yield {"type": "turn.started", "turn_id": turn_id}
+
+        usage = _jsonable(getattr(result, "usage", None)) or {}
+        if isinstance(usage, dict) and usage:
+            self.last_usage = usage
+            yield {"type": "usage", "usage": usage}
+
+        error = getattr(result, "error", None)
+        if error:
+            yield {"type": "turn.failed", "error": _jsonable(error)}
+            return
+
+        text_out = str(getattr(result, "final_response", None) or "")
+        if text_out:
+            yield {"type": "text.completed", "text": text_out}
+        yield {"type": "turn.completed", "data": {"id": turn_id, "status": _jsonable(getattr(result, "status", None))}}
+
+    async def start_device_login(self) -> dict[str, Any]:
+        await self.start()
+        try:
+            handle = await self.client.login_chatgpt_device_code()
+        except Exception as exc:
+            raise RpcError(f"Unable to start ChatGPT device login: {exc}") from exc
+        login_id = str(getattr(handle, "login_id", "") or "")
+        if not login_id:
+            raise RpcError("Codex SDK returned no login id")
+        state = {
+            "login_id": login_id,
+            "status": "pending",
+            "verification_url": str(getattr(handle, "verification_url", "") or ""),
+            "user_code": str(getattr(handle, "user_code", "") or ""),
+        }
+        self._login_handles[login_id] = handle
+        self._login_states[login_id] = state
+        self._login_tasks[login_id] = asyncio.create_task(self._wait_for_login(login_id, handle))
+        return dict(state)
+
+    async def _wait_for_login(self, login_id: str, handle: Any) -> None:
+        state = self._login_states.setdefault(login_id, {"login_id": login_id})
+        try:
+            result = await handle.wait()
+            state["status"] = "completed"
+            state["result"] = _jsonable(result)
+            try:
+                account = await self.client.account(refresh_token=True)
+                state["account"] = _jsonable(account)
+            except Exception:
+                pass
+        except asyncio.CancelledError:
+            state["status"] = "cancelled"
+            raise
+        except Exception as exc:
+            state["status"] = "failed"
+            state["error"] = str(exc)
         finally:
-            self._thread_queues[thread_id].discard(queue)
+            self._login_handles.pop(login_id, None)
+
+    async def device_login_status(self, login_id: str) -> dict[str, Any]:
+        await self.start()
+        state = self._login_states.get(login_id)
+        if not state:
+            raise RpcError("unknown login id")
+        return dict(state)
+
+    async def account_status(self) -> dict[str, Any]:
+        await self.start()
+        account_data: dict[str, Any] = {}
+        logged_in = False
+        try:
+            response = await self.client.account(refresh_token=False)
+            dumped = _jsonable(response)
+            if isinstance(dumped, dict):
+                account_data = dumped.get("account") if isinstance(dumped.get("account"), dict) else dumped
+                logged_in = bool(account_data)
+        except Exception:
+            account_data = {}
+            logged_in = False
+
+        models: list[str] = []
+        try:
+            model_response = _jsonable(await self.client.models())
+            candidates: Any = model_response
+            if isinstance(model_response, dict):
+                candidates = model_response.get("data") or model_response.get("models") or model_response.get("items") or []
+            if isinstance(candidates, list):
+                for item in candidates:
+                    if isinstance(item, str):
+                        models.append(item)
+                    elif isinstance(item, dict):
+                        model_id = item.get("id") or item.get("model") or item.get("slug")
+                        if model_id:
+                            models.append(str(model_id))
+        except Exception:
+            pass
+
+        return {
+            "logged_in": logged_in,
+            "account": account_data,
+            "models": models,
+            "usage": self.last_usage or {},
+            "sdk": "openai-codex",
+        }
 
     @staticmethod
     def normalize_event(event: dict[str, Any]) -> dict[str, Any] | None:
+        """Retained for old tests and for a future low-level streaming adapter."""
         method, params = str(event.get("method") or ""), event.get("params") or {}
         if method in {"item/agentMessage/delta", "agentMessage/delta"}:
             return {"type": "text.delta", "delta": str(params.get("delta") or params.get("text") or "")}
@@ -159,17 +280,10 @@ class CodexBridge:
                 return {"type": "text.completed", "text": text if isinstance(text, str) else ""}
         if method in {"thread/tokenUsage/updated", "turn/tokenUsage/updated"}:
             return {"type": "usage", "usage": params.get("tokenUsage") or params.get("usage") or params}
-        if method == "contextCompaction": return {"type": "context.compaction", "data": params}
-        if method == "turn/completed": return {"type": "turn.completed", "data": params}
-        if method in {"turn/failed", "error"}: return {"type": "turn.failed", "error": params.get("message") or params.get("error") or method}
+        if method == "contextCompaction":
+            return {"type": "context.compaction", "data": params}
+        if method == "turn/completed":
+            return {"type": "turn.completed", "data": params}
+        if method in {"turn/failed", "error"}:
+            return {"type": "turn.failed", "error": params.get("message") or params.get("error") or method}
         return None
-
-    async def account_status(self) -> dict[str, Any]:
-        async def optional(method: str) -> Any:
-            try: return await self.request(method, {})
-            except Exception: return None
-        account, rate_limits, usage = await asyncio.gather(optional("account/read"), optional("account/rateLimits/read"), optional("account/usage/read"))
-        if isinstance(account, dict) and isinstance(account.get("account"), dict): account = account["account"]
-        if isinstance(rate_limits, dict) and isinstance(rate_limits.get("rateLimits"), dict): rate_limits = rate_limits["rateLimits"]
-        if isinstance(usage, dict) and isinstance(usage.get("usage"), dict): usage = usage["usage"]
-        return {"account": account or {}, "rate_limits": rate_limits or {}, "usage": usage or self.last_usage or {}}

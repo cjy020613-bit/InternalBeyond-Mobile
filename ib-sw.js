@@ -1,6 +1,6 @@
 /* InternalBeyond Mobile — CY service worker overlay.
    Keeps upstream index.html untouched and injects the CY shell at response time. */
-const IB_CACHE='ib-cache-v7-cy';
+const IB_CACHE='ib-cache-v12-cy';
 const IB_CORE=[
   './',
   './index.html',
