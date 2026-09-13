@@ -12,6 +12,7 @@ const requiredFiles = [
   'custom/cy-ob-bridge.js',
   'custom/cy-gateway.css',
   'custom/cy-gateway.js',
+  'custom/cy-gateway-defaults.js',
   'custom/cy-mutual-paw.css',
   'custom/cy-mutual-paw.js',
   'custom/cy-identity.css',
@@ -25,13 +26,14 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map((file) => access(file)));
 
-const [manifestText, catalogText, serviceWorker, mutualPaw, identity, gatewayUi, codexBridge, requirements, gatewayApp] = await Promise.all([
+const [manifestText, catalogText, serviceWorker, mutualPaw, identity, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
   readFile('manifest.webmanifest', 'utf8'),
   readFile('apps/catalog.json', 'utf8'),
   readFile('ib-sw.js', 'utf8'),
   readFile('custom/cy-mutual-paw.js', 'utf8'),
   readFile('custom/cy-identity.js', 'utf8'),
   readFile('custom/cy-gateway.js', 'utf8'),
+  readFile('custom/cy-gateway-defaults.js', 'utf8'),
   readFile('gateway/codex_bridge.py', 'utf8'),
   readFile('gateway/requirements.txt', 'utf8'),
   readFile('gateway/app.py', 'utf8')
@@ -41,6 +43,7 @@ for (const asset of [
   './custom/cy-shell.css',
   './custom/cy-shell.js',
   './custom/cy-ob-bridge.js',
+  './custom/cy-gateway-defaults.js',
   './custom/cy-mutual-paw.css',
   './custom/cy-mutual-paw.js',
   './custom/cy-identity.css',
@@ -57,6 +60,9 @@ if (!identity.includes('shell.identity') || !identity.includes('ibcy.identity.pr
 }
 if (!gatewayUi.includes('/v1/codex/login/device') || !gatewayUi.includes('登录 ChatGPT')) {
   throw new Error('Codex device-login UI is incomplete');
+}
+if (!gatewayDefaults.includes('codex-gateway-production-f16b.up.railway.app')) {
+  throw new Error('CY gateway defaults are not pointing at Railway');
 }
 if (!codexBridge.includes('AsyncCodex') || !codexBridge.includes('login_chatgpt_device_code')) {
   throw new Error('gateway is not using the official Codex SDK login flow');
