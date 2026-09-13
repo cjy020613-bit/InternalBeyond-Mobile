@@ -43,7 +43,7 @@ jobs:
           node --check ib-sw.js
       - name: Check Python syntax
         run: |
-          python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/ob_client.py gateway/store.py
+          python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/ob_client.py gateway/ob_startup_probe.py gateway/store.py
           python -c "from openai_codex import AsyncCodex, Sandbox; assert AsyncCodex and Sandbox"
           python -c "from mcp import ClientSession; from mcp.client import streamable_http; assert ClientSession and streamable_http"
       - name: Check runtime files
