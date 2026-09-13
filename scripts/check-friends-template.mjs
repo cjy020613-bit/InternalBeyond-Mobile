@@ -3,24 +3,26 @@ import { access, readFile } from 'node:fs/promises';
 const required = [
   'custom/cy-friends-template.js',
   'custom/cy-friends-template.css',
+  'custom/cy-friends-template-bridge.js',
   'FRIENDS_TEMPLATE.md',
   'LICENSE'
 ];
 await Promise.all(required.map((file) => access(file)));
 
-const [runtime, styles, defaults, sw, guide, license] = await Promise.all([
+const [runtime, styles, bridge, defaults, sw, guide, license] = await Promise.all([
   readFile('custom/cy-friends-template.js', 'utf8'),
   readFile('custom/cy-friends-template.css', 'utf8'),
+  readFile('custom/cy-friends-template-bridge.js', 'utf8'),
   readFile('custom/cy-gateway-defaults.js', 'utf8'),
   readFile('ib-sw.js', 'utf8'),
   readFile('FRIENDS_TEMPLATE.md', 'utf8'),
   readFile('LICENSE', 'utf8')
 ]);
 
-for (const asset of ['./custom/cy-friends-template.js', './custom/cy-friends-template.css']) {
+for (const asset of ['./custom/cy-friends-template.js', './custom/cy-friends-template.css', './custom/cy-friends-template-bridge.js']) {
   if (!sw.includes(asset)) throw new Error(`friends template asset is not wired: ${asset}`);
 }
-if (!sw.includes('ib-cache-v22-friends-template')) throw new Error('friends template cache version is missing');
+if (!sw.includes('ib-cache-v23-friends-template')) throw new Error('friends template cache version is missing');
 if (!runtime.includes('ibcy.friends.profile.v1') || !runtime.includes('patchAppProfile') || !runtime.includes('rewriteProtocolText')) {
   throw new Error('friends template identity/runtime adapter is incomplete');
 }
@@ -32,6 +34,9 @@ if (!runtime.includes('CY_MUTUAL_PAW') || !runtime.includes('CY_SHARED_INTERACTI
 }
 if (!styles.includes('.cy-ft-mask') || !styles.includes('.cy-ft-card')) {
   throw new Error('friends template onboarding styles are incomplete');
+}
+if (!bridge.includes('ibcy:friends-profile-change') || !bridge.includes('loadCfgs') || !bridge.includes('shell.gateway.openSetup')) {
+  throw new Error('friends template onboarding handoff is incomplete');
 }
 if (defaults.includes('saved.endpoint = newEndpoint') || defaults.includes("saved.endpoint = 'https://codex-gateway")) {
   throw new Error('friends template still assigns a private default gateway');
@@ -46,4 +51,4 @@ if (!license.includes('PolyForm Noncommercial License 1.0.0') || !license.includ
   throw new Error('upstream noncommercial license/notice is missing');
 }
 
-console.log('Friends template OK: private gateway defaults removed, first-run identity + hidden prompt rewrite + deployment guide present');
+console.log('Friends template OK: private gateway defaults removed, first-run identity + hidden prompt rewrite + gateway handoff + deployment guide present');
