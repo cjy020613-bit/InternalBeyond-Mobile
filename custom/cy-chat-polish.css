@@ -1,0 +1,275 @@
+/* CY chat polish: unified identities, bottom interaction sheet, compact model entry. */
+
+#conv #cv-msgs .mrow.cy-chat-identity-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  width: 100% !important;
+  gap: 8px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-yingying {
+  justify-content: flex-end !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-chen {
+  justify-content: flex-start !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row > .cy-chat-avatar {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 50%;
+  color: #56749a;
+  background: linear-gradient(145deg, rgba(244,249,255,.98), rgba(205,222,245,.92));
+  box-shadow: 0 5px 13px rgba(54,82,119,.12), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row > .cy-chat-avatar[data-actor="chen"] {
+  color: #455f81;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(224,233,246,.94));
+}
+
+#conv #cv-msgs .cy-chat-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+#conv #cv-msgs .cy-chat-avatar > span {
+  font: 650 .68rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row .m-body {
+  width: auto !important;
+  max-width: min(78vw, 620px) !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-yingying .m-body {
+  align-items: flex-end !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-chen .m-body {
+  align-items: flex-start !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-paw-event-row {
+  margin: 2px 0 !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-paw-event-row > .cy-paw-row-avatar {
+  display: none !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-paw-event-row .m.cy-paw-event {
+  min-width: 0 !important;
+  max-width: min(62vw, 235px) !important;
+  padding: 8px 11px !important;
+  border-radius: 16px !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-yingying .m.cy-paw-event {
+  border-radius: 16px 16px 6px 16px !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-chat-from-chen .m.cy-paw-event {
+  border-radius: 16px 16px 16px 6px !important;
+}
+
+#conv #cv-msgs .mrow.cy-chat-identity-row.cy-paw-event-row .cy-paw-event-actor {
+  display: none !important;
+}
+
+#cy-paw-panel {
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-height: min(76dvh, 690px) !important;
+  margin: 0 !important;
+  padding: 16px 18px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: 28px 28px 0 0 !important;
+  background: linear-gradient(160deg, rgba(255,255,255,.98), rgba(236,244,254,.96)) !important;
+  box-shadow: 0 -20px 52px rgba(43,66,98,.2), inset 0 1px 0 rgba(255,255,255,1) !important;
+  transform: translateY(104%) !important;
+  transform-origin: bottom center !important;
+}
+
+#cy-paw-panel.open {
+  transform: translateY(0) !important;
+}
+
+#cy-paw-panel::before {
+  content: '';
+  display: block;
+  width: 42px;
+  height: 5px;
+  margin: -7px auto 12px;
+  border-radius: 999px;
+  background: rgba(87,111,145,.22);
+}
+
+#cy-paw-panel .cy-paw-head small {
+  display: none;
+}
+
+#cy-paw-panel .cy-paw-head b {
+  font-size: 1.05rem;
+}
+
+#cy-paw-panel > p {
+  margin: 8px 0 13px !important;
+  font-size: .72rem !important;
+}
+
+#cy-paw-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px !important;
+}
+
+#cy-paw-actions .cy-compose-action,
+.cy-compose-choices button {
+  min-width: 64px;
+  height: 39px;
+  padding: 0 14px;
+  border: 1px solid rgba(110,145,190,.12);
+  border-radius: 15px;
+  color: #405d80;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 5px 14px rgba(54,82,119,.055), inset 0 1px 0 rgba(255,255,255,.9);
+  font: 560 .78rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+#cy-paw-actions .cy-compose-action.selected,
+.cy-compose-choices button.selected {
+  color: #3d628f;
+  border-color: rgba(104,145,199,.24);
+  background: linear-gradient(145deg, rgba(223,238,255,.98), rgba(205,225,251,.92));
+  box-shadow: 0 7px 16px rgba(64,98,143,.10), inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.cy-compose-extra {
+  margin-top: 16px;
+}
+
+.cy-compose-group {
+  margin-top: 13px;
+}
+
+.cy-compose-group > small {
+  display: block;
+  margin-bottom: 8px;
+  color: #8a98ab;
+  font-size: .64rem;
+}
+
+.cy-compose-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cy-compose-targets .cy-compose-choices button {
+  min-width: 58px;
+}
+
+.cy-compose-counts .cy-compose-choices button {
+  min-width: 48px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: .68rem;
+}
+
+.cy-compose-confirm {
+  width: 100%;
+  height: 48px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 19px;
+  color: white;
+  background: linear-gradient(145deg, #7899c6, #5c7fae);
+  box-shadow: 0 11px 24px rgba(70,104,151,.22), inset 0 1px 0 rgba(255,255,255,.28);
+  font: 620 .86rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.cy-compose-confirm:disabled {
+  color: #91a0b4;
+  background: rgba(120,150,190,.10);
+  box-shadow: none;
+}
+
+#cy-paw-panel .cy-paw-tools {
+  margin-top: 11px;
+  opacity: .72;
+}
+
+#conv .cv-input {
+  position: relative;
+  padding-top: 34px !important;
+}
+
+#cy-model-pill {
+  position: absolute;
+  top: 6px;
+  left: 70px;
+  max-width: calc(100% - 145px);
+  height: 24px;
+  padding: 0 9px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  color: #70839e;
+  background: rgba(255,255,255,.42);
+  font: 560 .62rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.theme-infernal #cy-paw-panel {
+  background: linear-gradient(160deg, rgba(39,51,74,.98), rgba(24,33,53,.97)) !important;
+}
+
+body.theme-infernal #cy-paw-actions .cy-compose-action,
+body.theme-infernal .cy-compose-choices button,
+body.theme-infernal #cy-model-pill {
+  color: #c4d2e6;
+  border-color: rgba(255,255,255,.09);
+  background: rgba(255,255,255,.055);
+}
+
+@media (max-width: 390px) {
+  #conv #cv-msgs .mrow.cy-chat-identity-row > .cy-chat-avatar {
+    width: 29px;
+    height: 29px;
+    flex-basis: 29px;
+  }
+
+  #conv #cv-msgs .mrow.cy-chat-identity-row .m-body {
+    max-width: 79vw !important;
+  }
+
+  #cy-paw-panel {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+
+  #cy-paw-actions .cy-compose-action,
+  .cy-compose-choices button {
+    min-width: 60px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
