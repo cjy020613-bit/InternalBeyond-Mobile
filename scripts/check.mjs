@@ -57,7 +57,7 @@ if (!mutualPaw.includes('CY_MUTUAL_PAW') || !mutualPaw.includes('shell.paw.recei
 if (!identity.includes('shell.identity') || !identity.includes('ibcy.identity.profiles.v1')) {
   throw new Error('identity avatar layer is incomplete');
 }
-if (!codexAuth.includes('login/device') || !codexAuth.includes('login_chatgpt')) {
+if (!codexAuth.includes('/v1/codex/login/device') || !codexAuth.includes('登录 ChatGPT')) {
   throw new Error('Codex device-login UI is incomplete');
 }
 if (!codexBridge.includes('AsyncCodex') || !codexBridge.includes('login_chatgpt_device_code')) {
