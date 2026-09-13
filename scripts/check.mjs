@@ -12,6 +12,8 @@ const requiredFiles = [
   'custom/cy-ob-bridge.js',
   'custom/cy-gateway.css',
   'custom/cy-gateway.js',
+  'custom/cy-mutual-paw.css',
+  'custom/cy-mutual-paw.js',
   'gateway/app.py',
   'gateway/codex_bridge.py',
   'gateway/store.py'
@@ -19,16 +21,26 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map((file) => access(file)));
 
-const [manifestText, catalogText, serviceWorker] = await Promise.all([
+const [manifestText, catalogText, serviceWorker, mutualPaw] = await Promise.all([
   readFile('manifest.webmanifest', 'utf8'),
   readFile('apps/catalog.json', 'utf8'),
-  readFile('ib-sw.js', 'utf8')
+  readFile('ib-sw.js', 'utf8'),
+  readFile('custom/cy-mutual-paw.js', 'utf8')
 ]);
 
-for (const asset of ['./custom/cy-shell.css', './custom/cy-shell.js', './custom/cy-ob-bridge.js']) {
+for (const asset of [
+  './custom/cy-shell.css',
+  './custom/cy-shell.js',
+  './custom/cy-ob-bridge.js',
+  './custom/cy-mutual-paw.css',
+  './custom/cy-mutual-paw.js'
+]) {
   if (!serviceWorker.includes(asset)) throw new Error(`ib-sw.js is not wiring ${asset}`);
 }
 if (!serviceWorker.includes('data-ibcy-loader')) throw new Error('ib-sw.js is missing the CY HTML injection marker');
+if (!mutualPaw.includes('CY_MUTUAL_PAW') || !mutualPaw.includes('shell.paw.receive')) {
+  throw new Error('mutual paw protocol is incomplete');
+}
 
 const manifest = JSON.parse(manifestText);
 const catalog = JSON.parse(catalogText);
@@ -36,4 +48,4 @@ if (!manifest.name || !manifest.short_name || !manifest.start_url) throw new Err
 if (!Array.isArray(manifest.icons) || manifest.icons.length < 2) throw new Error('PWA icons are incomplete');
 if (!Array.isArray(catalog.apps)) throw new Error('apps/catalog.json has no apps array');
 
-console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s)`);
+console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), mutual paw enabled`);
