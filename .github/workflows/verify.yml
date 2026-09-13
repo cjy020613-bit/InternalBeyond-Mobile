@@ -33,6 +33,7 @@ jobs:
           node --check custom/cy-mutual-paw.js
           node --check custom/cy-interaction-lexicon.js
           node --check custom/cy-interaction-protocol-v2.js
+          node --check custom/cy-interaction-thread-v2.js
           node --check custom/cy-identity.js
           node --check custom/cy-chat-polish.js
           node --check apps/catalog.js
