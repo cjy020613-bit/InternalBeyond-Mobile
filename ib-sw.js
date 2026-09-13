@@ -1,6 +1,6 @@
 /* InternalBeyond Mobile — CY service worker overlay.
    Friends-template build: keeps upstream index.html untouched and injects the CY shell plus first-run personalization. */
-const IB_CACHE='ib-cache-v22-friends-template';
+const IB_CACHE='ib-cache-v23-friends-template';
 const IB_CORE=[
   './',
   './index.html',
@@ -28,11 +28,12 @@ const IB_CORE=[
   './custom/cy-native-avatar.css',
   './custom/cy-friends-template.css',
   './custom/cy-friends-template.js',
+  './custom/cy-friends-template-bridge.js',
   './apps/catalog.json',
   './apps/catalog.js'
 ];
 const CY_HEAD='<link rel="stylesheet" href="./custom/cy-shell.css?v=0.5.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-mutual-paw.css?v=0.2.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-paw-align-fix.css?v=0.1.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-chat-polish.css?v=0.3.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-interaction-editor.css?v=0.1.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-native-avatar.css?v=0.1.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-model-picker.css?v=0.1.0" data-ibcy-loader="1"><link rel="stylesheet" href="./custom/cy-friends-template.css?v=0.1.0" data-ibcy-loader="1">';
-const CY_BODY='<script src="./custom/cy-gateway-defaults.js?v=0.3.0" data-ibcy-loader="1"></script><script src="./custom/cy-shell.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-ob-bridge.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-mutual-paw.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-lexicon.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-protocol-v2.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-paw-stream-fast.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-thread-v2.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-chat-polish.js?v=0.3.0" data-ibcy-loader="1"></script><script src="./custom/cy-model-picker.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-friends-template.js?v=0.1.0" data-ibcy-loader="1"></script>';
+const CY_BODY='<script src="./custom/cy-gateway-defaults.js?v=0.3.0" data-ibcy-loader="1"></script><script src="./custom/cy-shell.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-ob-bridge.js?v=0.5.0" data-ibcy-loader="1"></script><script src="./custom/cy-mutual-paw.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-lexicon.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-protocol-v2.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-paw-stream-fast.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-interaction-thread-v2.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-chat-polish.js?v=0.3.0" data-ibcy-loader="1"></script><script src="./custom/cy-model-picker.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-friends-template.js?v=0.1.0" data-ibcy-loader="1"></script><script src="./custom/cy-friends-template-bridge.js?v=0.1.0" data-ibcy-loader="1"></script>';
 
 function injectCY(response){
   if(!response||!response.ok)return Promise.resolve(response);
