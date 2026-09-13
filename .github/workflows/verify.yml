@@ -38,6 +38,7 @@ jobs:
           node --check custom/cy-interaction-thread-v2.js
           node --check custom/cy-identity.js
           node --check custom/cy-chat-polish.js
+          node --check custom/cy-friends-template.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js
@@ -51,6 +52,7 @@ jobs:
           node scripts/check-inline.mjs
           node scripts/check-ob-bridge.mjs
           node scripts/check-model-picker.mjs
+          node scripts/check-friends-template.mjs
       - name: Check gateway core
         run: |
           cd gateway
