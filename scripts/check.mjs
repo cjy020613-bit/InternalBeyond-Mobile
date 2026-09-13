@@ -14,6 +14,7 @@ const requiredFiles = [
   'custom/cy-gateway.js',
   'custom/cy-gateway-defaults.js',
   'custom/cy-mutual-paw.css',
+  'custom/cy-paw-align-fix.css',
   'custom/cy-mutual-paw.js',
   'custom/cy-interaction-lexicon.js',
   'custom/cy-interaction-protocol-v2.js',
@@ -32,12 +33,13 @@ const requiredFiles = [
 
 await Promise.all(requiredFiles.map((file) => access(file)));
 
-const [indexText, manifestText, catalogText, serviceWorker, mutualPaw, lexicon, protocolV2, streamFast, threadV2, chatPolish, editorCss, nativeAvatarCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
+const [indexText, manifestText, catalogText, serviceWorker, mutualPaw, pawAlignFix, lexicon, protocolV2, streamFast, threadV2, chatPolish, editorCss, nativeAvatarCss, gatewayUi, gatewayDefaults, codexBridge, requirements, gatewayApp] = await Promise.all([
   readFile('index.html', 'utf8'),
   readFile('manifest.webmanifest', 'utf8'),
   readFile('apps/catalog.json', 'utf8'),
   readFile('ib-sw.js', 'utf8'),
   readFile('custom/cy-mutual-paw.js', 'utf8'),
+  readFile('custom/cy-paw-align-fix.css', 'utf8'),
   readFile('custom/cy-interaction-lexicon.js', 'utf8'),
   readFile('custom/cy-interaction-protocol-v2.js', 'utf8'),
   readFile('custom/cy-paw-stream-fast.js', 'utf8'),
@@ -58,6 +60,7 @@ for (const asset of [
   './custom/cy-ob-bridge.js',
   './custom/cy-gateway-defaults.js',
   './custom/cy-mutual-paw.css',
+  './custom/cy-paw-align-fix.css',
   './custom/cy-mutual-paw.js',
   './custom/cy-interaction-lexicon.js',
   './custom/cy-interaction-protocol-v2.js',
@@ -79,6 +82,9 @@ if (!indexText.includes('function _msgAva(m)') || !indexText.includes('_sameSend
 }
 if (!nativeAvatarCss.includes('.cy-chat-avatar') || !nativeAvatarCss.includes('.m-body') || !nativeAvatarCss.includes('row-reverse')) {
   throw new Error('native avatar compatibility layer is incomplete');
+}
+if (!pawAlignFix.includes('width: 100% !important') || !pawAlignFix.includes('cy-paw-from-yingying .m-body') || !pawAlignFix.includes('row-reverse') || !pawAlignFix.includes('cy-paw-from-chen .m-body')) {
+  throw new Error('paw side alignment fix is incomplete');
 }
 if (!mutualPaw.includes('CY_MUTUAL_PAW') || !mutualPaw.includes('shell.paw.receive')) {
   throw new Error('mutual paw protocol is incomplete');
@@ -123,4 +129,4 @@ if (!manifest.name || !manifest.short_name || !manifest.start_url) throw new Err
 if (!Array.isArray(manifest.icons) || manifest.icons.length < 2) throw new Error('PWA icons are incomplete');
 if (!Array.isArray(catalog.apps)) throw new Error('apps/catalog.json has no apps array');
 
-console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), fast streamed paw actions + upstream native avatars + dynamic interaction protocol/thread v2 + editable shared interactions + chat polish + mutual paw + official Codex login enabled`);
+console.log(`IB CY synced baseline OK: ${requiredFiles.length} files, ${catalog.apps.length} app(s), native-sided paw alignment + fast streamed paw actions + upstream native avatars + dynamic interaction protocol/thread v2 + editable shared interactions + chat polish + mutual paw + official Codex login enabled`);
