@@ -30,6 +30,7 @@ jobs:
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
           node --check custom/cy-gateway-defaults.js
+          node --check custom/cy-model-picker.js
           node --check custom/cy-mutual-paw.js
           node --check custom/cy-interaction-lexicon.js
           node --check custom/cy-interaction-protocol-v2.js
@@ -49,6 +50,7 @@ jobs:
           node scripts/check.mjs
           node scripts/check-inline.mjs
           node scripts/check-ob-bridge.mjs
+          node scripts/check-model-picker.mjs
       - name: Check gateway core
         run: |
           cd gateway
