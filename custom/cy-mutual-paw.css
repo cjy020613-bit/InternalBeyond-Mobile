@@ -1,0 +1,91 @@
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying {
+  justify-content: flex-end;
+  padding-left: 16%;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying .m-body {
+  justify-content: flex-end;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying .m-col {
+  align-items: flex-end;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen {
+  justify-content: flex-start;
+  padding-right: 16%;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen .m-body {
+  justify-content: flex-start;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen .m-col {
+  align-items: flex-start;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-yingying .m.cy-paw-event {
+  color: #f5f8fc;
+  border-color: transparent;
+  background: linear-gradient(145deg, #607b9f, #476486);
+  box-shadow: 0 8px 20px rgba(54,82,119,.14);
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-yingying .cy-paw-event-actor,
+#conv #cv-msgs .mrow.cy-paw-from-yingying .cy-paw-event-mark b {
+  color: inherit;
+}
+
+#conv #cv-msgs .mrow.cy-paw-from-chen .m.cy-paw-event {
+  border-color: rgba(112,145,188,.14);
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 7px 18px rgba(54,82,119,.06);
+}
+
+.cy-paw-mini,
+.cy-paw-sparkle {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.cy-paw-mini svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.cy-paw-sparkle {
+  color: #8da0ba;
+  font-size: .7rem;
+}
+
+.cy-paw-event-count {
+  margin-left: 2px;
+  opacity: .72;
+  font-size: .62rem;
+  font-weight: 650;
+}
+
+#conv #cv-msgs .mrow.cy-paw-command-only {
+  display: none !important;
+}
+
+body.theme-infernal #conv #cv-msgs .mrow.cy-paw-from-yingying .m.cy-paw-event {
+  color: #f3f7fd;
+  background: linear-gradient(145deg, #5e789c, #405a7c);
+}
+
+body.theme-infernal #conv #cv-msgs .mrow.cy-paw-from-chen .m.cy-paw-event {
+  color: #dbe6f5;
+  border-color: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06);
+}
+
+@media (max-width: 390px) {
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-yingying { padding-left: 9%; }
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-from-chen { padding-right: 9%; }
+}
