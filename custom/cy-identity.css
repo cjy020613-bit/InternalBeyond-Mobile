@@ -1,0 +1,279 @@
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar {
+  gap: 8px;
+  align-items: flex-end;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar.cy-paw-from-yingying {
+  padding-left: 12%;
+  padding-right: 0;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar.cy-paw-from-chen {
+  padding-left: 0;
+  padding-right: 12%;
+}
+
+#conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar .m-body {
+  max-width: min(72vw, 272px);
+}
+
+.cy-paw-row-avatar,
+.cy-id-avatar-inner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(235,244,255,.98), rgba(199,219,246,.9));
+  color: #58769d;
+  box-shadow: 0 5px 14px rgba(54,82,119,.12), inset 0 1px 0 rgba(255,255,255,.88);
+}
+
+.cy-paw-row-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border: 1px solid rgba(255,255,255,.86);
+}
+
+.cy-paw-row-avatar[data-actor="chen"],
+.cy-id-profile[data-profile="chen"] .cy-id-avatar-inner {
+  background: linear-gradient(145deg, rgba(250,252,255,.98), rgba(219,230,245,.92));
+  color: #4c6484;
+}
+
+.cy-paw-row-avatar img,
+.cy-id-avatar-inner img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.cy-avatar-initial {
+  font: 650 .72rem/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  letter-spacing: -.02em;
+}
+
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-event-actor {
+  display: none;
+}
+
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-event-mark {
+  grid-template-rows: auto;
+}
+
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-mini,
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-sparkle,
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-event-count {
+  grid-row: 1;
+}
+
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-mini,
+#conv #cv-msgs .mrow.cy-paw-has-avatar .cy-paw-sparkle {
+  align-self: center;
+}
+
+#conv #cv-msgs .mrow.cy-paw-has-avatar .m.cy-paw-event {
+  min-width: 96px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.cy-id-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  align-items: end;
+  padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: rgba(29,43,65,.16);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+}
+
+.cy-id-mask[hidden] {
+  display: none !important;
+}
+
+.cy-id-sheet {
+  width: min(430px, 100%);
+  margin: 0 auto;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.82);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(226,238,252,.91));
+  box-shadow: 0 24px 70px rgba(42,65,96,.24), inset 0 1px 0 rgba(255,255,255,.98);
+  -webkit-backdrop-filter: blur(28px) saturate(1.35);
+  backdrop-filter: blur(28px) saturate(1.35);
+}
+
+.cy-id-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cy-id-head small {
+  display: block;
+  margin-bottom: 4px;
+  color: #8397b2;
+  font-size: .56rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.cy-id-head h3 {
+  margin: 0;
+  color: #2f4d70;
+  font: 650 1.08rem/1.25 "Noto Serif SC", "PingFang SC", serif;
+}
+
+.cy-id-close {
+  width: 31px;
+  height: 31px;
+  border: 0;
+  border-radius: 50%;
+  color: #70839d;
+  background: rgba(100,132,174,.09);
+  font-size: 1.2rem;
+}
+
+.cy-id-hint {
+  margin: 10px 0 14px;
+  color: #718198;
+  font-size: .72rem;
+  line-height: 1.55;
+}
+
+.cy-id-profile {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid rgba(112,145,188,.11);
+}
+
+.cy-id-avatar {
+  width: 58px;
+  height: 58px;
+}
+
+.cy-id-avatar-inner {
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(255,255,255,.86);
+}
+
+.cy-id-avatar-inner .cy-avatar-initial {
+  font-size: 1.08rem;
+}
+
+.cy-id-profile-copy {
+  min-width: 0;
+}
+
+.cy-id-profile-copy b {
+  display: block;
+  color: #375779;
+  font-size: .88rem;
+}
+
+.cy-id-profile-copy span {
+  display: block;
+  margin-top: 4px;
+  color: #8a99ad;
+  font-size: .62rem;
+}
+
+.cy-id-profile-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.cy-id-profile-actions button {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(112,145,188,.16);
+  border-radius: 11px;
+  color: #587294;
+  background: rgba(255,255,255,.6);
+  font-size: .65rem;
+}
+
+.cy-id-profile-actions button:first-child {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(145deg, #7897c1, #5b7ba7);
+}
+
+.cy-id-status {
+  min-height: 18px;
+  margin-top: 9px;
+  color: #6c88aa;
+  font-size: .65rem;
+}
+
+.cy-id-status.error {
+  color: #b46872;
+}
+
+body.theme-infernal .cy-id-sheet {
+  border-color: rgba(255,255,255,.1);
+  background: linear-gradient(145deg, rgba(45,59,84,.97), rgba(25,34,55,.95));
+}
+
+body.theme-infernal .cy-id-head h3,
+body.theme-infernal .cy-id-profile-copy b {
+  color: #edf3fb;
+}
+
+body.theme-infernal .cy-id-hint,
+body.theme-infernal .cy-id-profile-copy span {
+  color: #a9b7cb;
+}
+
+body.theme-infernal .cy-id-profile {
+  border-top-color: rgba(255,255,255,.08);
+}
+
+body.theme-infernal .cy-id-profile-actions button {
+  color: #d6e2f2;
+  border-color: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06);
+}
+
+@media (max-width: 390px) {
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar.cy-paw-from-yingying {
+    padding-left: 6%;
+  }
+
+  #conv #cv-msgs .mrow.cy-paw-event-row.cy-paw-has-avatar.cy-paw-from-chen {
+    padding-right: 6%;
+  }
+
+  .cy-paw-row-avatar {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+  }
+
+  .cy-id-profile {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .cy-id-avatar,
+  .cy-id-avatar-inner {
+    width: 52px;
+    height: 52px;
+  }
+
+  .cy-id-profile-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    margin-top: -4px;
+  }
+}
