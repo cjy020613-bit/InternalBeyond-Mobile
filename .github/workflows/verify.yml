@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -18,16 +22,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install gateway dependencies
+        run: python -m pip install -r gateway/requirements.txt
       - name: Check JavaScript syntax
         run: |
           node --check custom/cy-shell.js
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
+          node --check custom/cy-gateway-defaults.js
           node --check custom/cy-mutual-paw.js
           node --check custom/cy-identity.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js
+      - name: Check Python syntax
+        run: |
+          python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/store.py
+          python -c "from openai_codex import AsyncCodex, Sandbox; assert AsyncCodex and Sandbox"
       - name: Check runtime files
         run: |
           node scripts/check.mjs

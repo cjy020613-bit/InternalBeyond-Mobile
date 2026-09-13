@@ -16,14 +16,24 @@
 .cy-gw-actions{display:flex;gap:10px;margin-top:18px}
 .cy-gw-actions button{flex:1;border:0;border-radius:16px;padding:12px;font:inherit;background:#e8edf5;color:#40506a}
 .cy-gw-actions .primary{background:#315d99;color:#fff}
+.cy-gw-actions-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.cy-gw-actions-three button{min-width:0;padding:11px 8px;font-size:12px}
 .cy-gw-result{margin-top:15px;border-radius:18px;background:rgba(219,229,243,.62);padding:13px 15px;font-size:13px;line-height:1.55;color:#52627c}
+.cy-gw-result p{margin:7px 0 0}
 .cy-gw-result.online{background:rgba(210,239,226,.68);color:#376a55}
 .cy-gw-result.error{background:rgba(244,220,220,.7);color:#895454}
 .cy-gw-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
 .cy-gw-metric{background:rgba(255,255,255,.66);border-radius:13px;padding:10px}
 .cy-gw-metric b{display:block;font-size:15px}.cy-gw-metric small{color:#7c899c}
+.cy-gw-login-step{display:grid;gap:10px}
+.cy-gw-login-step p{margin:0}
+.cy-gw-auth-link{display:block;text-align:center;text-decoration:none;border-radius:14px;padding:11px 12px;background:#315d99;color:#fff;font-weight:650}
+.cy-gw-device-code{display:block;text-align:center;letter-spacing:.18em;border-radius:14px;padding:12px;background:rgba(255,255,255,.72);color:#2d4e78;font:700 18px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;user-select:all}
+.cy-gw-login-step small{display:block;color:#71809a;line-height:1.55}
 body.theme-infernal .cy-gw-sheet{background:rgba(25,29,39,.95);color:#e9edf6;border-color:rgba(255,255,255,.12)}
 body.theme-infernal .cy-gw-field input{background:rgba(255,255,255,.06);color:#eef2fa;border-color:rgba(255,255,255,.12)}
 body.theme-infernal .cy-gw-result{background:rgba(255,255,255,.06);color:#bdc7d7}
 body.theme-infernal .cy-gw-metric{background:rgba(255,255,255,.05)}
+body.theme-infernal .cy-gw-device-code{background:rgba(255,255,255,.07);color:#dce8f9}
+@media(max-width:430px){.cy-gw-actions-three{grid-template-columns:1fr}.cy-gw-actions-three button{font-size:13px}}
 @media(min-width:700px){.cy-gw-mask{place-items:center}.cy-gw-sheet{padding:26px}}
