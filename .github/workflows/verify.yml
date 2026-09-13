@@ -24,6 +24,7 @@ jobs:
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
           node --check custom/cy-mutual-paw.js
+          node --check custom/cy-identity.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js
