@@ -1,8 +1,10 @@
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 from codex_bridge import CodexBridge
+from ob_client import OmbreClient, OmbreError, _clean_url, _result_payload
 from store import ConversationStore
 
 
@@ -27,6 +29,36 @@ class EventTests(unittest.TestCase):
         usage = CodexBridge.normalize_event({"method": "thread/tokenUsage/updated", "params": {"usage": {"inputTokens": 12}}})
         self.assertEqual(delta, {"type": "text.delta", "delta": "你好"})
         self.assertEqual(usage["usage"]["inputTokens"], 12)
+
+
+class OmbreClientTests(unittest.IsolatedAsyncioTestCase):
+    def test_url_normalization(self):
+        self.assertEqual(_clean_url("https://memory.example.com"), "https://memory.example.com/mcp")
+        self.assertEqual(_clean_url("https://memory.example.com/mcp/"), "https://memory.example.com/mcp")
+        with self.assertRaises(OmbreError):
+            _clean_url("memory.example.com")
+
+    def test_result_payload_json_and_text(self):
+        json_result = SimpleNamespace(content=[SimpleNamespace(type="text", text='{"ok":true}')], structuredContent=None)
+        text_result = SimpleNamespace(content=[SimpleNamespace(type="text", text="记得这件事")], structuredContent=None)
+        self.assertEqual(_result_payload(json_result), {"ok": True})
+        self.assertEqual(_result_payload(text_result), "记得这件事")
+
+    async def test_search_and_remember_arguments(self):
+        client = OmbreClient("https://memory.example.com")
+        calls = []
+
+        async def fake_call(tool, arguments=None):
+            calls.append((tool, arguments))
+            return {"ok": True}
+
+        client.call = fake_call
+        await client.search("海边", domain="恋爱", max_results=99)
+        await client.remember("一起去看海", title="海边", tags="约会", importance=12)
+        self.assertEqual(calls[0][0], "breath_search")
+        self.assertEqual(calls[0][1]["max_results"], 12)
+        self.assertEqual(calls[1][0], "hold")
+        self.assertEqual(calls[1][1]["importance"], 10)
 
 
 if __name__ == "__main__":
