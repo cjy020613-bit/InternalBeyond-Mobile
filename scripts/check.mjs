@@ -61,8 +61,8 @@ if (!identity.includes('shell.identity') || !identity.includes('ibcy.identity.pr
 if (!gatewayUi.includes('/v1/codex/login/device') || !gatewayUi.includes('登录 ChatGPT')) {
   throw new Error('Codex device-login UI is incomplete');
 }
-if (!gatewayDefaults.includes('codex-gateway-production-f16b.up.railway.app')) {
-  throw new Error('CY gateway defaults are not pointing at Railway');
+if (!gatewayDefaults.includes('codex-gateway-v2-production.up.railway.app')) {
+  throw new Error('CY gateway defaults are not pointing at Railway v2');
 }
 if (!codexBridge.includes('AsyncCodex') || !codexBridge.includes('login_chatgpt_device_code')) {
   throw new Error('gateway is not using the official Codex SDK login flow');
