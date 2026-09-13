@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from app import ChatRequest, _visible_query, ombre, recall_for_turn, turn_text
 from codex_bridge import CodexBridge
 from ob_client import OmbreClient, OmbreError, _clean_url, _result_payload
 from store import ConversationStore
@@ -59,6 +60,37 @@ class OmbreClientTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(calls[0][1]["max_results"], 12)
         self.assertEqual(calls[1][0], "hold")
         self.assertEqual(calls[1][1]["importance"], 10)
+
+
+class OmbreRecallTests(unittest.IsolatedAsyncioTestCase):
+    def test_hidden_runtime_is_not_used_as_search_query(self):
+        raw = "今晚吃火锅\n\n[CY_INTERACTION_RUNTIME]\n机器协议\n[/CY_INTERACTION_RUNTIME]"
+        self.assertEqual(_visible_query(raw), "今晚吃火锅")
+        self.assertEqual(_visible_query('[interaction.paw]\n{"action":"抱紧"}'), "")
+
+    async def test_recall_failure_degrades_without_blocking_turn(self):
+        body = ChatRequest(messages=[{"role": "user", "content": "还记得我们去海边吗"}])
+        old_url, old_search = ombre.url, ombre.search
+
+        async def fail_search(*args, **kwargs):
+            raise OmbreError("temporary offline")
+
+        try:
+            ombre.url = "https://memory.example.com/mcp"
+            ombre.search = fail_search
+            recalled = await recall_for_turn(body)
+            self.assertEqual(recalled, "")
+            self.assertEqual(turn_text(body, False, recalled), "还记得我们去海边吗")
+        finally:
+            ombre.url = old_url
+            ombre.search = old_search
+
+    def test_recalled_memory_is_hidden_context_not_transcript_mutation(self):
+        body = ChatRequest(messages=[{"role": "user", "content": "还记得吗"}])
+        rendered = turn_text(body, False, "我记得那天一起看海。")
+        self.assertIn("[CY_OB_MEMORY]", rendered)
+        self.assertIn("我记得那天一起看海。", rendered)
+        self.assertEqual(body.messages[0]["content"], "还记得吗")
 
 
 if __name__ == "__main__":
