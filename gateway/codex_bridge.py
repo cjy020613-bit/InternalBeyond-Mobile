@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import dataclasses
 import enum
+import json
 import os
 from pathlib import Path
 from typing import Any, AsyncIterator
@@ -33,26 +34,86 @@ def _jsonable(value: Any) -> Any:
     return str(value)
 
 
-def _assistant_text_fallback(result: Any) -> str:
-    """Recover the last user-visible agent message when final_response is absent.
+def _enum_text(value: Any) -> str:
+    if isinstance(value, enum.Enum):
+        value = value.value
+    return str(value or "")
 
-    Recent Codex protocol versions distinguish commentary and final-answer phases.
-    The SDK normally exposes the final answer as ``final_response``; if a turn
-    completes without that convenience field, an ``agentMessage`` item can still
-    contain visible assistant text. Reasoning items are intentionally ignored.
+
+def _message_text(value: Any) -> str:
+    """Extract visible text from an SDK message value without assuming one schema."""
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (list, tuple)):
+        parts = [_message_text(item) for item in value]
+        return "\n".join(part for part in parts if part)
+    if isinstance(value, dict):
+        direct = value.get("text") or value.get("content") or value.get("value")
+        if direct is value:
+            return ""
+        return _message_text(direct)
+    for attr in ("text", "content", "value"):
+        direct = getattr(value, attr, None)
+        if direct is not None and direct is not value:
+            text = _message_text(direct)
+            if text:
+                return text
+    return ""
+
+
+def _assistant_text_fallback(result: Any) -> str:
+    """Recover the last visible agent message when final_response is absent.
+
+    The Codex SDK may finish a turn with agent-message items even when its
+    convenience ``final_response`` field is empty (for example when phase
+    metadata differs across protocol versions). We inspect the typed objects
+    directly and deliberately ignore reasoning/tool items.
     """
     fallback = ""
     for wrapped in getattr(result, "items", None) or []:
         item = getattr(wrapped, "root", wrapped)
-        data = _jsonable(item)
-        if not isinstance(data, dict):
+        cls = type(item).__name__.lower()
+        kind = _enum_text(getattr(item, "type", None) or getattr(item, "kind", None)).lower()
+        normalized = kind.replace("_", "").replace("-", "").replace(" ", "")
+        role = _enum_text(getattr(item, "role", None)).lower()
+        is_agent = (
+            "agentmessage" in cls
+            or "assistantmessage" in cls
+            or normalized in {"agentmessage", "assistantmessage"}
+            or (normalized == "message" and role in {"", "assistant", "agent"})
+        )
+        if not is_agent:
             continue
-        if str(data.get("type") or "") not in {"agentMessage", "message"}:
-            continue
-        text = data.get("text") or data.get("content") or ""
-        if isinstance(text, str) and text.strip():
+        text = _message_text(getattr(item, "text", None) or getattr(item, "content", None))
+        if text.strip():
             fallback = text
     return fallback
+
+
+def _result_shape(result: Any) -> dict[str, Any]:
+    """Return content-free diagnostics: only schema names, phases and lengths."""
+    final = str(getattr(result, "final_response", None) or "")
+    items: list[dict[str, Any]] = []
+    for wrapped in (getattr(result, "items", None) or [])[:24]:
+        item = getattr(wrapped, "root", wrapped)
+        text = _message_text(getattr(item, "text", None) or getattr(item, "content", None))
+        items.append({
+            "wrapper": type(wrapped).__name__,
+            "class": type(item).__name__,
+            "type": _enum_text(getattr(item, "type", None) or getattr(item, "kind", None))[:80],
+            "phase": _enum_text(getattr(item, "phase", None))[:80],
+            "role": _enum_text(getattr(item, "role", None))[:40],
+            "text_len": len(text),
+        })
+    return {
+        "result_class": type(result).__name__,
+        "status": _enum_text(getattr(result, "status", None))[:80],
+        "final_len": len(final),
+        "item_count": len(getattr(result, "items", None) or []),
+        "items": items,
+    }
 
 
 class CodexBridge:
@@ -195,12 +256,20 @@ class CodexBridge:
 
         error = getattr(result, "error", None)
         if error:
+            print("[CY_CODEX_RESULT] " + json.dumps(_result_shape(result), ensure_ascii=False, separators=(",", ":")), flush=True)
             yield {"type": "turn.failed", "error": _jsonable(error)}
             return
 
         text_out = str(getattr(result, "final_response", None) or "")
+        fallback = ""
         if not text_out:
-            text_out = _assistant_text_fallback(result)
+            fallback = _assistant_text_fallback(result)
+            text_out = fallback
+        shape = _result_shape(result)
+        shape["fallback_len"] = len(fallback)
+        shape["output_len"] = len(text_out)
+        shape["paw_marker"] = bool(text_out and "[[CY_PAW" in text_out)
+        print("[CY_CODEX_RESULT] " + json.dumps(shape, ensure_ascii=False, separators=(",", ":")), flush=True)
         if not text_out:
             raise RpcError("Codex turn completed without assistant text")
         yield {"type": "text.completed", "text": text_out}
