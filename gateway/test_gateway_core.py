@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from app import ChatRequest, _visible_query, ombre, recall_for_turn, turn_text
-from codex_bridge import CodexBridge
+from codex_bridge import CodexBridge, _assistant_text_fallback
 from ob_client import OmbreClient, OmbreError, _clean_url, _result_payload
 from store import ConversationStore
 
@@ -30,6 +30,13 @@ class EventTests(unittest.TestCase):
         usage = CodexBridge.normalize_event({"method": "thread/tokenUsage/updated", "params": {"usage": {"inputTokens": 12}}})
         self.assertEqual(delta, {"type": "text.delta", "delta": "你好"})
         self.assertEqual(usage["usage"]["inputTokens"], 12)
+
+    def test_visible_agent_message_fallback(self):
+        result = SimpleNamespace(items=[
+            SimpleNamespace(root=SimpleNamespace(type="reasoning", text="hidden")),
+            SimpleNamespace(root=SimpleNamespace(type="agentMessage", text="给用户看的回复", phase="commentary")),
+        ])
+        self.assertEqual(_assistant_text_fallback(result), "给用户看的回复")
 
 
 class OmbreClientTests(unittest.IsolatedAsyncioTestCase):
