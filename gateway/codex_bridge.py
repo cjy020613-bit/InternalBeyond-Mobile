@@ -33,6 +33,28 @@ def _jsonable(value: Any) -> Any:
     return str(value)
 
 
+def _assistant_text_fallback(result: Any) -> str:
+    """Recover the last user-visible agent message when final_response is absent.
+
+    Recent Codex protocol versions distinguish commentary and final-answer phases.
+    The SDK normally exposes the final answer as ``final_response``; if a turn
+    completes without that convenience field, an ``agentMessage`` item can still
+    contain visible assistant text. Reasoning items are intentionally ignored.
+    """
+    fallback = ""
+    for wrapped in getattr(result, "items", None) or []:
+        item = getattr(wrapped, "root", wrapped)
+        data = _jsonable(item)
+        if not isinstance(data, dict):
+            continue
+        if str(data.get("type") or "") not in {"agentMessage", "message"}:
+            continue
+        text = data.get("text") or data.get("content") or ""
+        if isinstance(text, str) and text.strip():
+            fallback = text
+    return fallback
+
+
 class CodexBridge:
     """Long-lived wrapper around the official `openai-codex` Python SDK.
 
@@ -177,8 +199,11 @@ class CodexBridge:
             return
 
         text_out = str(getattr(result, "final_response", None) or "")
-        if text_out:
-            yield {"type": "text.completed", "text": text_out}
+        if not text_out:
+            text_out = _assistant_text_fallback(result)
+        if not text_out:
+            raise RpcError("Codex turn completed without assistant text")
+        yield {"type": "text.completed", "text": text_out}
         yield {"type": "turn.completed", "data": {"id": turn_id, "status": _jsonable(getattr(result, "status", None))}}
 
     async def start_device_login(self) -> dict[str, Any]:
