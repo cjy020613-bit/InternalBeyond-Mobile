@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from app import ChatRequest, _visible_query, ombre, recall_for_turn, turn_text
-from codex_bridge import CodexBridge, _assistant_text_fallback
+from codex_bridge import CodexBridge, _assistant_text_fallback, _result_shape
 from ob_client import OmbreClient, OmbreError, _clean_url, _result_payload
 from store import ConversationStore
 
@@ -37,6 +37,17 @@ class EventTests(unittest.TestCase):
             SimpleNamespace(root=SimpleNamespace(type="agentMessage", text="给用户看的回复", phase="commentary")),
         ])
         self.assertEqual(_assistant_text_fallback(result), "给用户看的回复")
+
+    def test_typed_agent_message_fallback_without_type_field(self):
+        AgentMessageThreadItem = type("AgentMessageThreadItem", (), {})
+        item = AgentMessageThreadItem()
+        item.text = "对象里的可见回复"
+        item.phase = "commentary"
+        result = SimpleNamespace(items=[SimpleNamespace(root=item)], final_response="", status="completed")
+        self.assertEqual(_assistant_text_fallback(result), "对象里的可见回复")
+        shape = _result_shape(result)
+        self.assertEqual(shape["final_len"], 0)
+        self.assertEqual(shape["items"][0]["text_len"], len("对象里的可见回复"))
 
 
 class OmbreClientTests(unittest.IsolatedAsyncioTestCase):
