@@ -26,6 +26,7 @@ jobs:
         run: python -m pip install -r gateway/requirements.txt
       - name: Check JavaScript syntax
         run: |
+          node --check custom/cy-bootstrap.js
           node --check custom/cy-shell.js
           node --check custom/cy-ob-bridge.js
           node --check custom/cy-gateway.js
@@ -46,6 +47,10 @@ jobs:
           python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/ob_client.py gateway/ob_startup_probe.py gateway/store.py
           python -c "from openai_codex import AsyncCodex, Sandbox; assert AsyncCodex and Sandbox"
           python -c "from mcp import ClientSession; from mcp.client import streamable_http; assert ClientSession and streamable_http"
+      - name: Check V2.5.5 bootstrap
+        run: |
+          grep -q 'custom/cy-bootstrap.js' index.html
+          grep -q 'data-ibcy-loader="1"' index.html
       - name: Check runtime files
         run: |
           node scripts/check.mjs
