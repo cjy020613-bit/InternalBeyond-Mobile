@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" role="img" aria-label="Infernal Beyond · Mobile">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c1424"/><stop offset=".55" stop-color="#121c33"/><stop offset="1" stop-color="#19243f"/></linearGradient>
+<radialGradient id="g1" cx=".16" cy=".2" r=".5"><stop offset="0" stop-color="#2b4d80" stop-opacity=".55"/><stop offset="1" stop-color="#2b4d80" stop-opacity="0"/></radialGradient>
+<radialGradient id="g2" cx=".88" cy=".82" r=".55"><stop offset="0" stop-color="#3b2d63" stop-opacity=".5"/><stop offset="1" stop-color="#3b2d63" stop-opacity="0"/></radialGradient>
+<linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2a47" stop-opacity=".72"/><stop offset="1" stop-color="#1a2640" stop-opacity=".52"/></linearGradient>
+<linearGradient id="drop" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#b7d1f5"/><stop offset="1" stop-color="#5f8fd0"/></linearGradient>
+<linearGradient id="hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="sh" x="-15%" y="-20%" width="130%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity=".45"/></filter>
+<filter id="blur"><feGaussianBlur stdDeviation="1.2"/></filter>
+</defs>
+<rect width="1280" height="440" fill="url(#bg)"/><rect width="1280" height="440" fill="url(#g1)"/><rect width="1280" height="440" fill="url(#g2)"/>
+<g fill="none" stroke="#7f9fd2" stroke-opacity=".28" stroke-width="1.2"><ellipse cx="640" cy="222" rx="548" ry="158"/><ellipse cx="640" cy="222" rx="462" ry="126" stroke-dasharray="1.5 8" stroke-linecap="round"/></g>
+<g fill="#cfe0fa" opacity=".75"><path d="M140 96l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/><path d="M1122 318l2.4 7 7 2.4-7 2.4-2.4 7-2.4-7-7-2.4 7-2.4z"/><path d="M1046 92l1.8 5.4 5.4 1.8-5.4 1.8-1.8 5.4-1.8-5.4-5.4-1.8 5.4-1.8z"/><path d="M232 338l1.8 5.4 5.4 1.8-5.4 1.8-1.8 5.4-1.8-5.4-5.4-1.8 5.4-1.8z"/></g>
+<g filter="url(#sh)"><rect x="298" y="78" width="684" height="286" rx="36" fill="url(#card)" stroke="#9fb9e6" stroke-opacity=".28" stroke-width="1.2"/></g>
+<rect x="360" y="79" width="560" height="1.4" fill="url(#hl)"/>
+<g transform="translate(640 138)"><path d="M0 -30 C 0 -30 -24 -2 -24 15 A 24 24 0 0 0 24 15 C 24 -2 0 -30 0 -30 Z" fill="url(#drop)"/><path d="M-9 8 A 11 11 0 0 0 -3 22" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/></g>
+<text x="640" y="244" text-anchor="middle" font-family="'Cormorant Garamond','Cormorant','EB Garamond',Georgia,'Times New Roman',serif" font-size="66" font-weight="500" letter-spacing="2.5" fill="#eaf1fd">Infernal Beyond</text>
+<text x="640" y="282" text-anchor="middle" font-family="'Helvetica Neue','Segoe UI',Arial,sans-serif" font-size="14" letter-spacing="8" fill="#9fb3d4">MOBILE · IB 机 · PWA</text>
+<rect x="590" y="301" width="100" height="1" fill="#9fb3d4" opacity=".45"/>
+<text x="640" y="334" text-anchor="middle" font-family="'Noto Serif SC','Source Han Serif SC','Songti SC','SimSun',serif" font-size="17" letter-spacing="2.4" fill="#b9c8e2">离线运行的单文件个人网站 · 旨于维系情感的连续性</text>
+</svg>
