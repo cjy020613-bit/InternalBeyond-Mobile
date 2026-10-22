@@ -5,7 +5,9 @@ const html = await readFile('index.html', 'utf8');
 const markup = html.replace(/<!--[\s\S]*?-->/g, '');
 const scripts = [...markup.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)]
   .filter((match) => !/\bsrc\s*=/.test(match[1]))
-  .filter((match) => !/\btype\s*=\s*["'](?:application\/json|application\/ld\+json)["']/.test(match[1]));
+  .filter((match) => !/\btype\s*=\s*["'](?:application\/json|application\/ld\+json)["']/.test(match[1]))
+  // Upstream v3.1.3 embeds an encoded text payload in this script tag; it is data, not JavaScript.
+  .filter((match) => !/\bid\s*=\s*["']ib-coast-src["']/i.test(match[1]));
 
 let failed = false;
 scripts.forEach((match, index) => {
