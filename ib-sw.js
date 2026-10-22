@@ -1,6 +1,7 @@
 /* InternalBeyond Mobile — CY service worker overlay.
    Keeps upstream index.html untouched and injects the CY shell at response time. */
-const IB_CACHE='ib-cache-v23-cy';
+const IB_CACHE='ib-cache-v24-cy-ib313';
+const NAV_TIMEOUT=20000,ASSET_TIMEOUT=9000,FAST_FALLBACK=3500;
 const IB_CORE=[
   './',
   './index.html',
@@ -69,39 +70,52 @@ self.addEventListener('activate',function(e){
   }));
 });
 
+
+/* Adapted from upstream v3.1.3: timeout handling and fast cached navigation fallback. */
+function withTimeout(p,ms){
+  return new Promise(function(resolve,reject){
+    var t=setTimeout(function(){reject(new Error('timeout'))},ms);
+    p.then(function(v){clearTimeout(t);resolve(v)},function(err){clearTimeout(t);reject(err)});
+  });
+}
+function offlinePage(){
+  return new Response('<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>InternalBeyond</title><body style="font-family:system-ui;text-align:center;padding:40px"><h3>暂时加载不上</h3><p>本机还没有离线副本，检查网络后重试。</p><button onclick="location.reload()">重试</button></body>',{status:200,headers:{'content-type':'text/html; charset=utf-8'}});
+}
+
 self.addEventListener('fetch',function(e){
   if(e.request.method!=='GET')return;
   const url=new URL(e.request.url);
   if(url.origin!==self.location.origin)return;
-
-  if(e.request.mode==='navigate'){
-    e.respondWith(fetch(e.request).then(function(response){
-      return injectCY(response);
-    }).then(function(response){
+  const isNav=e.request.mode==='navigate'||e.request.destination==='document';
+  if(isNav){
+    const net=fetch(e.request).then(injectCY).then(function(response){
       if(response&&response.ok){
         const copy=response.clone();
-        caches.open(IB_CACHE).then(function(cache){cache.put(e.request,copy);});
+        caches.open(IB_CACHE).then(function(cache){return cache.put(e.request,copy)}).catch(function(){});
       }
       return response;
-    }).catch(function(){
-      return caches.match(e.request,{ignoreSearch:true}).then(function(match){
-        if(match)return injectCY(match);
-        return caches.match('./index.html').then(function(index){
-          if(index)return injectCY(index);
-          throw new Error('offline');
-        });
-      });
+    });
+    e.waitUntil(net.then(function(){},function(){}));
+    e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(function(cached){
+      function offlineFallback(){
+        if(cached)return injectCY(cached);
+        return caches.match('./index.html').then(function(index){return index?injectCY(index):offlinePage()});
+      }
+      if(!cached)return withTimeout(net,NAV_TIMEOUT).catch(offlineFallback);
+      const fast=new Promise(function(resolve){setTimeout(function(){resolve(injectCY(cached))},FAST_FALLBACK)});
+      return Promise.race([withTimeout(net,NAV_TIMEOUT).catch(offlineFallback),fast]);
     }));
     return;
   }
-
-  e.respondWith(fetch(e.request).then(function(response){
+  const net=fetch(e.request).then(function(response){
     if(response&&response.ok){
       const copy=response.clone();
-      caches.open(IB_CACHE).then(function(cache){cache.put(e.request,copy);});
+      caches.open(IB_CACHE).then(function(cache){return cache.put(e.request,copy)}).catch(function(){});
     }
     return response;
-  }).catch(function(){
+  });
+  e.waitUntil(net.then(function(){},function(){}));
+  e.respondWith(withTimeout(net,ASSET_TIMEOUT).catch(function(){
     return caches.match(e.request,{ignoreSearch:true}).then(function(match){
       if(match)return match;
       throw new Error('offline');
