@@ -1,4 +1,4 @@
-name: Deploy CY to GitHub Pages
+name: Deploy IB to GitHub Pages
 
 on:
   push:
@@ -37,4 +37,3 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# CY redeploy trigger 2026-09-13
