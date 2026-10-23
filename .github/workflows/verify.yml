@@ -39,6 +39,7 @@ jobs:
         run: |
           node scripts/check.mjs
           node scripts/check-inline.mjs
+          node scripts/check-native-provider.mjs
       - name: Check gateway core
         run: |
           cd gateway
