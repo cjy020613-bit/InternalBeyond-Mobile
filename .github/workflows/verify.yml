@@ -1,4 +1,4 @@
-name: Verify IB CY
+name: Verify IB + Codex Provider
 
 on:
   push:
@@ -26,32 +26,19 @@ jobs:
         run: python -m pip install -r gateway/requirements.txt
       - name: Check JavaScript syntax
         run: |
-          node --check custom/cy-shell.js
-          node --check custom/cy-ob-bridge.js
-          node --check custom/cy-gateway.js
-          node --check custom/cy-gateway-defaults.js
-          node --check custom/cy-model-picker.js
-          node --check custom/cy-mutual-paw.js
-          node --check custom/cy-interaction-lexicon.js
-          node --check custom/cy-interaction-protocol-v2.js
-          node --check custom/cy-paw-stream-fast.js
-          node --check custom/cy-interaction-thread-v2.js
-          node --check custom/cy-identity.js
-          node --check custom/cy-chat-polish.js
+          node --check custom/ib-codex-provider.js
           node --check apps/catalog.js
           node --check apps/ib-app-cinema.js
           node --check ib-sw.js
-      - name: Check Python syntax
+      - name: Check Python syntax and Codex SDK
         run: |
           python -m py_compile gateway/app.py gateway/codex_bridge.py gateway/ob_client.py gateway/ob_startup_probe.py gateway/store.py
           python -c "from openai_codex import AsyncCodex, Sandbox; assert AsyncCodex and Sandbox"
           python -c "from mcp import ClientSession; from mcp.client import streamable_http; assert ClientSession and streamable_http"
-      - name: Check runtime files
+      - name: Check stock IB + native subscription integration
         run: |
           node scripts/check.mjs
           node scripts/check-inline.mjs
-          node scripts/check-ob-bridge.mjs
-          node scripts/check-model-picker.mjs
       - name: Check gateway core
         run: |
           cd gateway
