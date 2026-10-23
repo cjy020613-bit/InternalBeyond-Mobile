@@ -14,7 +14,8 @@
     var str=String(value||'').trim().replace(/\/+$/,'');
     if(!str)return'';
     if(!/^https?:\/\//i.test(str))str='https://'+str;
-    if(!/\/v1\/chat\/completions$/i.test(str))str+='/v1/chat/completions';
+    if(/\/v1$/i.test(str))str+='/chat/completions';
+    else if(!/\/v1\/chat\/completions$/i.test(str))str+='/v1/chat/completions';
     return str;
   }
   function baseUrl(){
@@ -116,6 +117,7 @@
       setSwitch('aset-cache',false);
       setSwitch('aset-web',false);
     } else clearLogin();
+    current=element('aset-provider')&&element('aset-provider').value||current;
   }
   function attach(){
     if(installed)return;
@@ -149,9 +151,9 @@
       if(now===ID&&was!==ID){
         var old=legacy();
         var ep=element('aset-endpoint');
-        if(ep&&(!ep.value||ep.value===PROVIDERS[was]?.endpoint))ep.value=endpoint(old.endpoint)||ENDPOINT;
+        if(ep)ep.value=endpoint(old.endpoint)||ENDPOINT;
         var model=element('aset-model');
-        if(model&&(!model.value||model.value===PROVIDERS[was]?.model))model.value=String(old.model||MODEL);
+        if(model)model.value=String(old.model||MODEL);
         element('aset-key').value=String(old.token||'');
       }
       if(was===ID&&now!==ID)element('aset-key').value='';
